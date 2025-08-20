@@ -1,0 +1,740 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Movement Map — Speed Shapes (Multi-Style)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+<style>
+  html,body{margin:0;background:#fcfcfc;height:100%}
+  canvas{display:block;margin:0 auto}
+  .topbar{position:fixed;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;
+          padding:10px 12px;background:#fff;border-bottom:1px solid #00000014;z-index:10;
+          font:14px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .topbar .btn{padding:6px 10px;border-radius:10px;border:1px solid #00000022;background:#fff;cursor:pointer}
+  .topbar .btn.active{background:#111;color:#fff;border-color:#111}
+  .spacer{flex:1}
+  .badge{background:#00000012;padding:6px 10px;border-radius:10px;font:13px}
+  .ui{position:fixed;left:16px;bottom:16px;background:#ffffffcc;padding:10px 12px;border-radius:12px;
+      font:14px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+  .ui label{display:block;margin:6px 0 2px;color:#333}
+  .ui input,.ui select{width:240px}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .pill{padding:2px 8px;border-radius:999px;background:#00000010}
+  .legend{margin-top:6px;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#0000000d}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .error{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:#ffeded;color:#a40000;padding:8px 12px;border-radius:10px;font:13px;display:none;z-index:11}
+  .muted{font-size:12px;color:#555;margin-top:4px}
+  body{padding-top:52px}
+</style>
+</head>
+<body>
+
+<div class="topbar" id="styleBar">
+  <strong>Styles:</strong>
+  <div class="spacer"></div>
+  <span id="infoBadge" class="badge">—</span>
+</div>
+
+<div class="ui">
+  <div class="row"><strong>Movement Map — Speed Shapes</strong><span class="pill" id="statePill">loading…</span></div>
+
+  <label>Axis (projection)</label>
+  <div class="row">
+    <button class="btn" id="btnXZ">X / Z</button>
+    <button class="btn" id="btnXY">X / Y</button>
+    <button class="btn" id="btnYZ">Y / Z</button>
+  </div>
+
+  <label>Part</label>
+  <select id="partSel">
+    <option value="ALL">ALL (whole body)</option>
+    <option value="Head">Head</option>
+    <option value="Torso">Torso</option>
+    <option value="L-Arm">Left Arm</option>
+    <option value="R-Arm">Right Arm</option>
+    <option value="L-Leg">Left Leg</option>
+    <option value="R-Leg">Right Leg</option>
+    <option value="Other">Digit</option>
+  </select>
+
+  <label>Bone (optional)</label>
+  <select id="boneSel"><option value="">— all bones in part —</option></select>
+
+  <label>Style</label>
+  <select id="renderMode">
+    <option value="lines">Trail Lines (color = speed)</option>
+    <option value="shapes" selected>Speed Shapes (size = speed)</option>
+  </select>
+
+  <label>Shape</label>
+  <select id="shapeSel">
+    <option value="circle" selected>Circle</option>
+    <option value="square">Square</option>
+    <option value="triangle">Triangle</option>
+  </select>
+
+  <label>Shape Size</label>
+  <input id="shapeSize" type="range" min="0.5" max="3.0" step="0.1" value="1.4">
+
+  <label>Tempo (speed & smooth)</label>
+  <input id="tempo" type="range" min="0.2" max="2.5" step="0.1" value="0.9">
+
+  <label>Trail (segments)</label>
+  <input id="trail" type="range" min="50" max="4000" step="50" value="2000">
+
+  <label>Tone (hue shift)</label>
+  <input id="tone" type="range" min="0" max="360" step="1" value="0">
+
+  <label><input id="colorBySpeed" type="checkbox" checked> Color encodes speed (for Shapes mode)</label>
+  <div class="muted">기본은 <u>크기=속도</u>. 체크 시 <u>색상도</u> 속도에 반응.</div>
+
+  <label><input id="showFig" type="checkbox" checked> Show Figure (right-bottom)</label>
+  <label><input id="showAllDots" type="checkbox" checked> Show all joints dots</label>
+
+  <div class="legend">
+    <span class="chip"><span id="dotSlow" class="dot"></span>slow</span>
+    <span class="chip"><span id="dotMid"  class="dot"></span>mid</span>
+    <span class="chip"><span id="dotFast" class="dot"></span>fast</span>
+  </div>
+  <div style="margin-top:6px;color:#333">␣: play/pause · ←/→: ±1s(루프) · ↑/↓: tempo · S: PNG</div>
+</div>
+
+<div class="error" id="errBox"></div>
+
+<script>
+/* ===================== DEBUG / OPTIONS ===================== */
+const DEBUG = false;
+const USE_CLIP = true;
+const SHOW_FIG_JOINT_DOTS = false;
+const SHOW_FIG_TRAIL = false;
+
+/* ===================== MULTI-STYLE ===================== */
+const BASE_PATH = "";
+const STYLES = [
+  ["popping","Popping"],
+  ["ballet","Ballet"],
+  ["contemporary","Contemporary"],
+  ["breakdance","Breakdance"],
+  ["waacking","Waacking"],
+  ["Haka","Haka"],
+  ["irishtap","Irish Tap"],
+  ["traditionalkorean","Traditional Korean"],
+];
+let CURRENT_STYLE_KEY = "popping";
+
+/* ===================== CONFIG ===================== */
+let CSV_NAME = "";
+let PANEL_RATIO=0.62, L_W, R_W; const BG=252;
+let PROJECTION='XZ';
+const SCALE_MAG=0.86, MARGIN=80;
+const FPS=30;
+const MIN_WEIGHT=0.3, MAX_WEIGHT=14.0, BASE_ALPHA=10, MAX_ALPHA=255;
+let HUE_SLOW=200, HUE_FAST=20, SAT_SLOW=70, SAT_FAST=100, BRI_SLOW=60, BRI_FAST=100;
+const CURVE_SUBDIV_FACTOR=0.16, SMOOTH_ALPHA_BASE=0.18, FRAME_SKIP=1;
+const DATA_TICK_MODE='count', DATA_TICKS=10, DATA_STEP=0.1, MINOR_SUBDIV=4;
+const AXIS_LABEL_SIZE=12, AXIS_NAME_SIZE=12, LABEL_DECIMALS=2;
+const DATA_GRID_COLOR=[0,0,0,26], DATA_GRID_MAJOR=1.0, DATA_GRID_MINOR=0.6, DATA_AXIS_COLOR=[0,0,0,140], DATA_LABEL_COLOR=[0,0,0,190];
+
+/* ===== Figure box config ===== */
+const FIG_BASE_SIZE = 260;
+const FIG_PAD = 16;
+const FIG_MARGIN = 8;
+
+/* ===== Figure drawing params ===== */
+const FIG_BONE_W=3.2, FIG_TRAIL_LEN=10;
+
+/* ===================== DATA & STATE ===================== */
+let table, extent, extentVis, rows, bonesByPart, rowsByBone;
+let segments, orderedSegs, contextLines;
+let cx,cy,cz,s,pTL,pBR;               // 좌측 그리드용 뷰 파라미터
+let fcx,fcy,fcz,fs,fpTL,fpBR;         // figure(전체 몸) 전용 뷰 파라미터
+let lastMillis=0, playing=true;
+let animFrameF=0, minFrame=0, maxFrame=0;
+
+let activeBones = new Set();          // 좌측 그리드에 표시되는 본들
+let allVisibleBones = new Set();      // figure가 항상 사용할 전체 본 집합
+
+/* ===== dynamic figure box state ===== */
+let figBox = { cx:null, cy:null, size:FIG_BASE_SIZE };
+
+/* ===================== UI refs ===================== */
+let partSel,boneSel,tempoSlider,trailSlider,toneSlider,showFig,statePill,errBox,infoBadge;
+let btnXZ,btnXY,btnYZ, dotSlow,dotMid,dotFast;
+let renderModeSel, shapeSel, shapeSizeSlider, colorBySpeedChk;
+
+/* ===== figure state ===== */
+const idxCache=new Map(), jointTrail=new Map(), figState=new Map();
+
+/* ===== aliases/chains ===== */
+const AL=a=>a;
+const JOINT_ALIASES={ Hips:AL(['pelvis','hips','root','root.x']),
+  Spine1:AL(['spine_01']), Spine2:AL(['spine_02']), Spine3:AL(['spine_03']), Spine4:AL(['spine_04']), Spine5:AL(['spine_05']),
+  Neck1:AL(['neck_01']), Neck2:AL(['neck_02']), Head:AL(['head']),
+  LClav:AL(['clavicle_l','clavicle.l']), RClav:AL(['clavicle_r','clavicle.r']),
+  LUpperArm:AL(['upperarm_l','upperarm.l']), RUpperArm:AL(['upperarm_r','upperarm.r']),
+  LLowerArm:AL(['lowerarm_l','lowerarm.l']), RLowerArm:AL(['lowerarm_r','lowerarm.r']),
+  LWrist:AL(['hand_l','wrist_inner_l','wrist_outer_l','hand.l']),
+  RWrist:AL(['hand_r','wrist_inner_r','wrist_outer_r','hand.r']),
+  LIndexMC:AL(['index_metacarpal_l']),LIndex1:AL(['index_01_l']),LIndex2:AL(['index_02_l']),LIndex3:AL(['index_03_l']),
+  LMiddleMC:AL(['middle_metacarpal_l']),LMiddle1:AL(['middle_01_l']),LMiddle2:AL(['middle_02_l']),LMiddle3:AL(['middle_03_l']),
+  LRingMC:AL(['ring_metacarpal_l']),LRing1:AL(['ring_01_l']),LRing2:AL(['ring_02_l']),LRing3:AL(['ring_03_l']),
+  LPinkyMC:AL(['pinky_metacarpal_l']),LPinky1:AL(['pinky_01_l']),LPinky2:AL(['pinky_02_l']),LPinky3:AL(['pinky_03_l']),
+  LThumb1:AL(['thumb_01_l']),LThumb2:AL(['thumb_02_l']),LThumb3:AL(['thumb_03_l']),
+  RIndexMC:AL(['index_metacarpal_r']),RIndex1:AL(['index_01_r']),RIndex2:AL(['index_02_r']),RIndex3:AL(['index_03_r']),
+  RMiddleMC:AL(['middle_metacarpal_r']),RMiddle1:AL(['middle_01_r']),RMiddle2:AL(['middle_02_r']),RMiddle3:AL(['middle_03_r']),
+  RRingMC:AL(['ring_metacarpal_r']),RRing1:AL(['ring_01_r']),RRing2:AL(['ring_02_r']),RRing3:AL(['ring_03_r']),
+  RPinkyMC:AL(['pinky_metacarpal_r']),RPinky1:AL(['pinky_01_r']),RPinky2:AL(['pinky_02_r']),RPinky3:AL(['pinky_03_r']),
+  RThumb1:AL(['thumb_01_r']),RThumb2:AL(['thumb_02_r']),RThumb3:AL(['thumb_03_r']),
+  LThigh:AL(['thigh_l']),LKnee:AL(['calf_l','knee_l']),LAnkle:AL(['foot_l','ankle_l']),LBall:AL(['ball_l','toebase_l']),
+  RThigh:AL(['thigh_r']),RKnee:AL(['calf_r','knee_r']),RAnkle:AL(['foot_r','ankle_r']),RBall:AL(['ball_r','toebase_r'])};
+const STICK_CHAINS=[
+  ['Hips','Spine1','Spine2','Spine3','Spine4','Spine5','Neck1','Neck2','Head'],
+  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist','LIndexMC','LIndex1','LIndex2','LIndex3'],
+  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist','LMiddleMC','LMiddle1','LMiddle2','LMiddle3'],
+  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist','LRingMC','LRing1','LRing2','LRing3'],
+  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist','LPinkyMC','LPinky1','LPinky2','LPinky3'],
+  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RIndexMC','RIndex1','RIndex2','RIndex3'],
+  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RMiddleMC','RMiddle1','RMiddle2','RMiddle3'],
+  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RRingMC','RRing1','RRing2','RRing3'],
+  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RPinkyMC','RPinky1','RPinky2','RPinky3'],
+  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RThumb1','RThumb2','RThumb3'],
+  ['Hips','LThigh','LKnee','LAnkle','LBall'],
+  ['Hips','RThigh','RKnee','RAnkle','RBall'],
+];
+
+/* ===================== helpers ===================== */
+const normName=s=>(s||'').toLowerCase().replace(/^mixamorig[:]?/,'').replace(/[^a-z0-9_.]/g,'');
+function isHiddenBone(name){
+  const n=normName(name);
+  return n==='root'||n.startsWith('root.')||n==='ik_hand_root'||n==='ik_foot_root'||n==='center_of_mass'||n==='centerofmass'||n==='interaction';
+}
+function scoredCandidates(aliases){
+  const keys=Array.from(rowsByBone.keys()); const out=[];
+  for(const k of keys){ const nk=normName(k); let score=0;
+    for(const a of aliases){ const na=normName(a);
+      if(nk===na) score+=120; else if(nk.endsWith(na)) score+=70; else if(nk.includes(na)) score+=35;
+    } out.push({name:k,score});
+  } return out.filter(c=>c.score>0).sort((a,b)=>b.score-a.score);
+}
+const lrBonus=(name,side)=>{const s=normName(name);const L=/(\.l|_l|left)/.test(s),R=/(\.r|_r|right)/.test(s);return side==='L'?(L?+60:0)+(R?-40:0):side==='R'?(R?+60:0)+(L?-40:0):0;}
+let jointToBone=null, autoEdges=[];
+function buildJointMapping(){
+  jointToBone={}; autoEdges=[];
+  for(const j of ['Hips','Spine1','Spine2','Spine3','Spine4','Spine5','Neck1','Neck2','Head']){
+    const c=scoredCandidates(JOINT_ALIASES[j]); if(c[0]) jointToBone[j]=c[0].name;
+  }
+  const pair=(L,R)=>{
+    const l=scoredCandidates(JOINT_ALIASES[L]).map(c=>({name:c.name,score:c.score+lrBonus(c.name,'L')}));
+    const r=scoredCandidates(JOINT_ALIASES[R]).map(c=>({name:c.name,score:c.score+lrBonus(c.name,'R')}));
+    l.sort((a,b)=> b.score - a.score); r.sort((a,b)=> b.score - a.score);
+    let Lb=l[0],Rb=r[0];
+    if(Lb&&Rb&&Lb.name===Rb.name){
+      const l2=l[1],r2=r[1];
+      if(l2&&(!r2||l2.score>=r2.score)) Rb=r2||Rb; else if(r2) Lb=l2;
+    }
+    if(Lb) jointToBone[L]=Lb.name; if(Rb) jointToBone[R]=Rb.name;
+  };
+  ['Clav','UpperArm','LowerArm','Wrist','Thigh','Knee','Ankle','Ball',
+   'IndexMC','Index1','Index2','Index3','MiddleMC','Middle1','Middle2','Middle3',
+   'RingMC','Ring1','Ring2','Ring3','PinkyMC','Pinky1','Pinky2','Pinky3','Thumb1','Thumb2','Thumb3']
+   .forEach(suf=>pair(`L${suf}`,`R${suf}`));
+  for(const chain of STICK_CHAINS){
+    let prev=null; for(const j of chain){ if(!jointToBone[j]){ prev=null; continue; } if(prev) autoEdges.push([prev,j]); prev=j; }
+  }
+}
+
+/* ===================== p5 lifecycle ===================== */
+function preload(){
+  CSV_NAME = `${BASE_PATH}all_bones_coords_${CURRENT_STYLE_KEY}.csv`;
+  table=loadTable(CSV_NAME,'csv','header',
+    ()=>console.log('CSV loaded:', location.origin + '/' + CSV_NAME),
+    e=>{console.error('CSV load error',e); showErr('CSV를 불러오지 못했습니다: '+CSV_NAME);} 
+  );
+}
+function setup(){
+  createCanvas(windowWidth, windowHeight); pixelDensity(2); colorMode(HSB,360,100,100,255);
+  strokeCap(ROUND); noFill(); computePanels();
+
+  // UI refs
+  partSel=document.getElementById('partSel'); boneSel=document.getElementById('boneSel');
+  tempoSlider=document.getElementById('tempo'); trailSlider=document.getElementById('trail');
+  toneSlider=document.getElementById('tone');
+  showFig=document.getElementById('showFig');
+  statePill=document.getElementById('statePill'); errBox=document.getElementById('errBox'); infoBadge=document.getElementById('infoBadge');
+  btnXZ=document.getElementById('btnXZ'); btnXY=document.getElementById('btnXY'); btnYZ=document.getElementById('btnYZ');
+  btnXZ.onclick=()=>setProjection('XZ'); btnXY.onclick=()=>setProjection('XY'); btnYZ.onclick=()=>setProjection('YZ');
+
+  renderModeSel=document.getElementById('renderMode');
+  shapeSel=document.getElementById('shapeSel');
+  shapeSizeSlider=document.getElementById('shapeSize');
+  colorBySpeedChk=document.getElementById('colorBySpeed');
+
+  dotSlow=document.getElementById('dotSlow'); dotMid=document.getElementById('dotMid'); dotFast=document.getElementById('dotFast');
+  toneSlider.addEventListener('input', ()=>updateLegendTone(parseInt(toneSlider.value||0)));
+
+  buildStyleButtons();
+  parseTableAndBuild();
+  setProjection('XZ');
+  setTrailMid();
+
+  // 새로고침마다 tone 랜덤
+  const randTone = Math.floor(Math.random()*361);
+  toneSlider.value = String(randTone);
+  updateLegendTone(randTone);
+
+  updateInfoBadge();
+}
+window.addEventListener('error', e=>{ const b=document.getElementById('errBox'); b.textContent=e.message; b.style.display='block'; });
+
+function windowResized(){
+  resizeCanvas(windowWidth, windowHeight);
+  computePanels();
+  computeView();
+  computeFigureView();
+  rebuildSegments();
+}
+
+/* ====== parse/build ====== */
+function parseTableAndBuild(){
+  extent={minX:1e9,maxX:-1e9,minY:1e9,maxY:-1e9,minZ:1e9,maxZ:-1e9};
+  rows=[]; bonesByPart=new Map(); rowsByBone=new Map();
+  segments=[]; orderedSegs=[]; contextLines=[];
+  jointToBone=null; autoEdges=[];
+  idxCache.clear(); jointTrail.clear(); figState.clear();
+
+  if(!table || table.getRowCount()===0){ showErr('CSV가 비었거나 로드 실패'); noLoop(); return; }
+
+  minFrame=Infinity; maxFrame=-Infinity;
+  for(let r=0;r<table.getRowCount();r++){
+    const f=int(table.getString(r,'frame'));
+    const b=table.getString(r,'bone');
+    const p=table.getString(r,'part')||'Other';
+    const x=parseFloat(table.getString(r,'x')), y=parseFloat(table.getString(r,'y')), z=parseFloat(table.getString(r,'z'));
+    rows.push({f,b,p,x,y,z});
+    if(!isHiddenBone(b)){
+      extent.minX=Math.min(extent.minX,x); extent.maxX=Math.max(extent.maxX,x);
+      extent.minY=Math.min(extent.minY,y); extent.maxY=Math.max(extent.maxY,y);
+      extent.minZ=Math.min(extent.minZ,z); extent.maxZ=Math.max(extent.maxZ,z);
+    }
+    if(!bonesByPart.has(p)) bonesByPart.set(p,new Set()); bonesByPart.get(p).add(b);
+    if(!rowsByBone.has(b)) rowsByBone.set(b,[]); rowsByBone.get(b).push({f,x,y,z});
+    minFrame=Math.min(minFrame,f); maxFrame=Math.max(maxFrame,f);
+  }
+  for(const [k,arr] of rowsByBone) arr.sort((a,b)=>a.f-b.f);
+
+  if(partSel){
+    partSel.addEventListener('change', refreshBoneOptions);
+    boneSel.addEventListener('change', ()=>rebuildSegments());
+  }
+  refreshBoneOptions();
+
+  computeView();
+  computeFigureView();
+  buildJointMapping();
+  rebuildSegments();
+  animFrameF=minFrame; lastMillis=millis();
+}
+
+/* ====== style buttons ====== */
+function buildStyleButtons(){
+  const bar=document.getElementById('styleBar');
+  [...bar.querySelectorAll(".btn[data-style]")].forEach(b=>b.remove());
+  STYLES.forEach(([key,label])=>{
+    const btn=document.createElement('button');
+    btn.className='btn'; btn.dataset.style=key; btn.textContent=label;
+    if(key===CURRENT_STYLE_KEY) btn.classList.add('active');
+    btn.onclick=()=>{
+      [...bar.querySelectorAll('.btn[data-style]')].forEach(b=>b.classList.toggle('active', b===btn));
+      switchStyle(key,label);
+    };
+    bar.insertBefore(btn, bar.querySelector('.spacer'));
+  });
+}
+function switchStyle(key,labelText){
+  CURRENT_STYLE_KEY=key;
+  CSV_NAME = `${BASE_PATH}all_bones_coords_${key}.csv`;
+  statePill.textContent='loading…';
+  loadTable(CSV_NAME,'csv','header',
+    (tbl)=>{ table=tbl; parseTableAndBuild(); setTrailMid(); updateLegendTone(parseInt(toneSlider.value||0)); statePill.textContent='ready'; },
+    (e)=>{ console.error('CSV load error',e); showErr('CSV를 불러오지 못했습니다: '+CSV_NAME); statePill.textContent='error'; }
+  );
+}
+
+/* ====== projection/view ====== */
+function computePanels(){ L_W=Math.floor(width*PANEL_RATIO); R_W=width-L_W; }
+function setProjection(mode){
+  PROJECTION=mode;
+  btnXZ.classList.toggle('active',mode==='XZ'); btnXY.classList.toggle('active',mode==='XY'); btnYZ.classList.toggle('active',mode==='YZ');
+  rebuildSegments();     // 내부에서 extentVis 계산 후 computeView 호출
+  computeFigureView();   // figure 전용 뷰도 갱신
+}
+function computeView(){
+  const ex = extentVis || extent; if(!ex) return;
+  const spanX=Math.max(1e-6,ex.maxX-ex.minX), spanY=Math.max(1e-6,ex.maxY-ex.minY), spanZ=Math.max(1e-6,ex.maxZ-ex.minZ);
+  cx=(ex.minX+ex.maxX)/2; cy=(ex.minY+ex.maxY)/2; cz=(ex.minZ+ex.maxZ)/2;
+  let sx,sy; const viewW=L_W, viewH=height;
+  if(PROJECTION==='XY'){ sx=((viewW-MARGIN*2)*SCALE_MAG)/spanX; sy=((viewH-MARGIN*2)*SCALE_MAG)/spanY; }
+  else if(PROJECTION==='XZ'){ sx=((viewW-MARGIN*2)*SCALE_MAG)/spanX; sy=((viewH-MARGIN*2)*SCALE_MAG)/spanZ; }
+  else { sx=((viewW-MARGIN*2)*SCALE_MAG)/spanY; sy=((viewH-MARGIN*2)*SCALE_MAG)/spanZ; }
+  s=Math.min(sx,sy);
+  const W2S=(wx,wy)=> (PROJECTION==='XY')?{x:(wx-cx)*s,y:(wy-cy)*-s}:(PROJECTION==='XZ')?{x:(wx-cx)*s,y:(wy-cz)*-s}:{x:(wx-cy)*s,y:(wy-cz)*-s};
+  if(PROJECTION==='XY'){ pTL=W2S(ex.minX,ex.maxY); pBR=W2S(ex.maxX,ex.minY); }
+  else if(PROJECTION==='XZ'){ pTL=W2S(ex.minX,ex.maxZ); pBR=W2S(ex.maxX,ex.minZ); }
+  else { pTL=W2S(ex.minY,ex.maxZ); pBR=W2S(ex.maxY,ex.minZ); }
+}
+function computeFigureView(){
+  const ex = extent; if(!ex) return; // 항상 전체 범위
+  const spanX=Math.max(1e-6,ex.maxX-ex.minX), spanY=Math.max(1e-6,ex.maxY-ex.minY), spanZ=Math.max(1e-6,ex.maxZ-ex.minZ);
+  fcx=(ex.minX+ex.maxX)/2; fcy=(ex.minY+ex.maxY)/2; fcz=(ex.minZ+ex.maxZ)/2;
+  let sx,sy;
+  if(PROJECTION==='XY'){ sx=((L_W-MARGIN*2)*SCALE_MAG)/spanX; sy=((height-MARGIN*2)*SCALE_MAG)/spanY; }
+  else if(PROJECTION==='XZ'){ sx=((L_W-MARGIN*2)*SCALE_MAG)/spanX; sy=((height-MARGIN*2)*SCALE_MAG)/spanZ; }
+  else { sx=((L_W-MARGIN*2)*SCALE_MAG)/spanY; sy=((height-MARGIN*2)*SCALE_MAG)/spanZ; }
+  fs=Math.min(sx,sy);
+  const W2S=(wx,wy)=> (PROJECTION==='XY')?{x:(wx-fcx)*fs,y:(wy-fcy)*-fs}:(PROJECTION==='XZ')?{x:(wx-fcx)*fs,y:(wy-fcz)*-fs}:{x:(wx-fcy)*fs,y:(wy-fcz)*-fs};
+  if(PROJECTION==='XY'){ fpTL=W2S(ex.minX,ex.maxY); fpBR=W2S(ex.maxX,ex.minY); }
+  else if(PROJECTION==='XZ'){ fpTL=W2S(ex.minX,ex.maxZ); fpBR=W2S(ex.maxX,ex.minZ); }
+  else { fpTL=W2S(ex.minY,ex.maxZ); fpBR=W2S(ex.maxY,ex.minZ); }
+}
+
+/* ====== segments ====== */
+function rebuildSegments(){
+  if(!rowsByBone) return;
+  segments=[]; orderedSegs=[]; contextLines=[];
+  extentVis = {minX:1e9,maxX:-1e9,minY:1e9,maxY:-1e9,minZ:1e9,maxZ:-1e9};
+  const part=partSel.value, boneFilter=boneSel.value;
+
+  // Figure(전체) 본 집합
+  allVisibleBones = new Set([...rowsByBone.keys()].filter(b=>!isHiddenBone(b)));
+
+  // 1) 먼저 사용 범위 계산만 수행
+  const candidates=(boneFilter)?[boneFilter]:(part==='ALL'?Array.from(rowsByBone.keys()):Array.from(bonesByPart.get(part)||[]));
+  const useBones=candidates.filter(b=>!isHiddenBone(b));
+  activeBones = new Set(useBones);
+
+  let updatedVis=false;
+  for(const b of useBones){
+    const arrFull=(rowsByBone.get(b)||[]);
+    for(const q of arrFull){
+      if(q.x<extentVis.minX) extentVis.minX=q.x; if(q.x>extentVis.maxX) extentVis.maxX=q.x;
+      if(q.y<extentVis.minY) extentVis.minY=q.y; if(q.y>extentVis.maxY) extentVis.maxY=q.y;
+      if(q.z<extentVis.minZ) extentVis.minZ=q.z; if(q.z>extentVis.maxZ) extentVis.maxZ=q.z;
+      updatedVis=true;
+    }
+  }
+  if(!updatedVis){ extentVis = extent; }   // 안전장치
+
+  // 2) 새 범위로 스케일/센터 갱신
+  computeView();
+  computeFigureView();
+
+  // 3) 이제 화면 좌표 생성
+  const W2S=(o)=> (PROJECTION==='XY')?{x:(o.x-cx)*s,y:(o.y-cy)*-s}:(PROJECTION==='XZ')?{x:(o.x-cx)*s,y:(o.z-cz)*-s}:{x:(o.y-cy)*s,y:(o.z-cz)*-s};
+  let allSpeeds=[];
+  for(const b of useBones){
+    const arrFull=(rowsByBone.get(b)||[]);
+    const arr=arrFull.filter((_,i)=>(i%FRAME_SKIP)===0);
+    if(arr.length<2) continue;
+    const pts=[];
+    for(let i=1;i<arr.length;i++){
+      const prev=arr[i-1], curr=arr[i]; const p0=W2S(prev), p1=W2S(curr); pts.push(p0);
+      const d=dist(p0.x,p0.y,p1.x,p1.y), n=Math.max(1,int(d*CURVE_SUBDIV_FACTOR)); let pv=p0;
+      for(let k=1;k<=n;k++){
+        const t=k/n, x=lerp(p0.x,p1.x,t), y=lerp(p0.y,p1.y,t), spd=dist(pv.x,pv.y,x,y), frameF=lerp(prev.f,curr.f,t);
+        segments.push({a:{...pv}, b:{x,y}, spd, frameF}); allSpeeds.push(spd); pv={x,y};
+      }
+      if(i===arr.length-1) pts.push(p1);
+    }
+    contextLines.push(pts);
+  }
+  if(segments.length===0){ statePill.textContent='no data'; return; }
+
+  allSpeeds.sort((a,b)=>a-b); const q=p=>allSpeeds[int(constrain(p*(allSpeeds.length-1),0,allSpeeds.length-1))];
+  const SLOW=q(0.10), FAST=q(0.95);
+  const tVals=segments.map(sg=>norm(clamp(sg.spd,SLOW,FAST),SLOW,FAST)); const sm=new Array(tVals.length); sm[0]=tVals[0];
+  for(let i=1;i<tVals.length;i++) sm[i]=lerp(sm[i-1],tVals[i],SMOOTH_ALPHA_BASE);
+  segments.forEach((sg,i)=>sg.tSm=sm[i]);
+  orderedSegs=segments.slice().sort((a,b)=>a.frameF-b.frameF);
+  statePill.textContent='ready'; updateInfoBadge();
+}
+
+/* ====== sampling ====== */
+function sampleBoneAtFrameF(bone, frameF){
+  const arr=rowsByBone.get(bone); if(!arr||arr.length===0) return null;
+  let i=idxCache.get(bone)||0; while(i<arr.length-2&&arr[i+1].f<frameF)i++; while(i>0&&arr[i].f>frameF)i--; idxCache.set(bone,i);
+  const a=arr[i], b=arr[Math.min(i+1,arr.length-1)];
+  const denom = Math.max(1e-6, (b.f - a.f));
+  const t = constrain((frameF - a.f)/denom, 0, 1);
+  if(!isFinite(t)) return {x:a.x, y:a.y, z:a.z};
+  return {x:lerp(a.x,b.x,t), y:lerp(a.y,b.y,t), z:lerp(a.z,b.z,t)};
+}
+
+/* ===================== draw ===================== */
+function draw(){
+  const now=millis(), dt=(now-lastMillis)/1000; lastMillis=now;
+  background(BG);
+
+  if(!orderedSegs || !extent || !pTL || !pBR){ return; }
+
+  const tempo=parseFloat(tempoSlider.value);
+
+  if(playing){ animFrameF += dt * FPS * tempo; if(animFrameF>maxFrame) animFrameF = minFrame + (animFrameF - maxFrame); }
+  animFrameF = constrain(animFrameF, minFrame, maxFrame);
+
+  const hueShift = (parseInt(toneSlider.value)||0);
+  const hs = (h)=> (h + hueShift) % 360;
+
+  // 좌측 그리드
+  push(); translate(width/2, height/2); if(pTL&&pBR) drawDataGrid();
+
+  // 메인 도형/궤적
+  const mode = renderModeSel.value;
+  const iEnd = upperBound(orderedSegs, animFrameF);
+  const iStart = Math.max(0, iEnd - int(trailSlider.value));
+
+  if(mode==='lines'){
+    stroke(hs(190),20,90,36); strokeWeight(1);
+    for(const pts of contextLines){ for(let i=1;i<pts.length;i++) line(pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y); }
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i], t=sg.tSm;
+      stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), lerp(SAT_SLOW,SAT_FAST,t), lerp(BRI_SLOW,BRI_FAST,t), 80);
+      strokeWeight(lerp(MIN_WEIGHT*1.4, MAX_WEIGHT*1.6, t));
+      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
+    }
+    for(let i=iStart;i<=iEnd;i++){
+      const age=(iEnd-i)/Math.max(1,(iEnd-iStart)), fade=1.0-age; const sg=orderedSegs[i], t=sg.tSm;
+      stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), lerp(SAT_SLOW,SAT_FAST,t), lerp(BRI_SLOW,BRI_FAST,t), lerp(BASE_ALPHA,MAX_ALPHA,t)*fade);
+      strokeWeight(lerp(MIN_WEIGHT, MAX_WEIGHT, t)*(0.85+0.15*fade));
+      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
+    }
+  } else {
+    const shapeType = shapeSel.value;
+    const sizeScale = parseFloat(shapeSizeSlider.value);
+    const useColorBySpeed = colorBySpeedChk.checked;
+
+    noStroke();
+    for(let i=iStart;i<=iEnd;i++){
+      const age=(iEnd-i)/Math.max(1,(iEnd-iStart)), fade=1.0-age;
+      const sg=orderedSegs[i], t=sg.tSm;
+      const sz = (lerp(4, 22, t) * sizeScale);
+      const alpha = 180 * fade;
+      const hue = useColorBySpeed ? hs(lerp(HUE_SLOW,HUE_FAST,t)) : hs(18);
+      fill(hue, useColorBySpeed ? lerp(SAT_SLOW,SAT_FAST,t) : 20,
+                 useColorBySpeed ? lerp(BRI_SLOW,BRI_FAST,t) : 18, alpha);
+
+      const x=sg.b.x, y=sg.b.y;
+      if(shapeType==='circle'){ ellipse(x,y,sz,sz); }
+      else if(shapeType==='square'){ push(); rectMode(CENTER); rect(x,y,sz,sz,2); pop(); }
+      else{ const ang = Math.atan2(sg.b.y - sg.a.y, sg.b.x - sg.a.x); const r = sz*0.6;
+            push(); translate(x,y); rotate(ang); triangle(-r*0.7, r*0.6, 0, -r, r*0.7, r*0.6); pop(); }
+    }
+  }
+
+  if(orderedSegs[iEnd]){
+    const cur=orderedSegs[iEnd].b; noStroke(); fill(0,220); ellipse(cur.x,cur.y,10,10);
+    const frameI=Math.round(animFrameF), timeSec=animFrameF/FPS; drawOverlay(frameI,timeSec);
+  }
+
+  // Figure 박스 위치/크기: 그리드 오른쪽, 바닥 라인 맞춤
+  if(pBR){
+    const gridBottomY = height/2 + pBR.y;
+    const maxPossibleSizeY = Math.max(40, gridBottomY - FIG_MARGIN);
+    figBox.size = Math.min(FIG_BASE_SIZE, maxPossibleSizeY);
+
+    const desiredCX = width/2 + pBR.x + FIG_PAD + figBox.size/2;
+    const minCX = figBox.size/2 + FIG_MARGIN;
+    const maxCX = width - figBox.size/2 - FIG_MARGIN;
+    figBox.cx = constrain(desiredCX, minCX, maxCX);
+
+    figBox.cy = gridBottomY - figBox.size/2;
+  }
+  pop();
+
+  if(showFig.checked && orderedSegs.length>0){
+    drawFigureMapped(animFrameF);
+  }
+
+  statePill.textContent = playing ? 'playing' : 'paused';
+  updateInfoBadge();
+}
+
+function upperBound(arr, frameF){
+  let lo=0, hi=arr.length-1, ans=0; while(lo<=hi){ const mid=(lo+hi)>>1; if(arr[mid].frameF<=frameF){ ans=mid; lo=mid+1; } else hi=mid-1; } return ans;
+}
+
+/* ====== figure (전체 몸으로 고정) ====== */
+function drawFigureMapped(frameF){
+  if(!rowsByBone || rowsByBone.size===0 || figBox.cx==null || figBox.cy==null) return;
+
+  const tempo = parseFloat(tempoSlider.value);
+  const smoothA = map(tempo, 0.2, 2.5, 0.55, 0.10, true);
+  const hueShift = (parseInt(toneSlider.value)||0);
+
+  // 전체 범위 기준 투영
+  const worldToFigGrid = (p)=> {
+    if(PROJECTION==='XY') return {x:(p.x-fcx)*fs, y:(p.y-fcy)*-fs};
+    if(PROJECTION==='XZ') return {x:(p.x-fcx)*fs, y:(p.z-fcz)*-fs};
+    return {x:(p.y-fcy)*fs, y:(p.z-fcz)*-fs};
+  };
+  const figGridToBox = (gx, gy)=>{
+    const gx0 = Math.min(fpTL.x, fpBR.x), gx1 = Math.max(fpTL.x, fpBR.x);
+    const gy0 = Math.min(fpTL.y, fpBR.y), gy1 = Math.max(fpTL.y, fpBR.y);
+    const fx = map(gx, gx0, gx1, figBox.cx - figBox.size/2, figBox.cx + figBox.size/2);
+    const fy = map(gy, gy0, gy1, figBox.cy - figBox.size/2, figBox.cy + figBox.size/2);
+    return {x:fx, y:fy};
+  };
+
+  // 전체 본만
+  const bonesToIter = allVisibleBones;
+  figState.forEach((_,bn)=>{ if(!allVisibleBones.has(bn)) figState.delete(bn); });
+
+  for(const bone of bonesToIter){
+    const p=sampleBoneAtFrameF(bone, frameF); if(!p) continue;
+    const prev=figState.get(bone)||p;
+    const sm={x:prev.x+(p.x-prev.x)*smoothA, y:prev.y+(p.y-prev.y)*smoothA, z:prev.z+(p.z-prev.z)*smoothA};
+    figState.set(bone,sm);
+  }
+
+  // clip
+  const ctx = drawingContext;
+  if (USE_CLIP){
+    ctx.save();
+    ctx.beginPath();
+    const bx = Math.round(figBox.cx - figBox.size/2);
+    const by = Math.round(figBox.cy - figBox.size/2);
+    const bw = Math.round(figBox.size);
+    const bh = Math.round(figBox.size);
+    ctx.rect(bx, by, bw, bh);
+    ctx.clip();
+  }
+
+  stroke((18+hueShift)%360, 90, 95, 235); strokeWeight(FIG_BONE_W); noFill();
+  for(const [a,b] of autoEdges){
+    const ba=jointToBone[a], bb=jointToBone[b]; 
+    if(!ba||!bb) continue;
+    const pa=figState.get(ba), pb=figState.get(bb); if(!pa||!pb) continue;
+    const ga=worldToFigGrid(pa), gb=worldToFigGrid(pb);
+    if(!isFinite(ga.x)||!isFinite(ga.y)||!isFinite(gb.x)||!isFinite(gb.y)) continue;
+    const fa=figGridToBox(ga.x,ga.y), fb=figGridToBox(gb.x,gb.y);
+    line(fa.x,fa.y,fb.x,fb.y);
+  }
+
+  if (SHOW_FIG_TRAIL){
+    const dotHue=(18+hueShift)%360; noStroke();
+    for(const k of Object.keys(JOINT_ALIASES)){
+      const bn=jointToBone[k];
+      const p=bn?figState.get(bn):null; if(!p) continue;
+      const g=worldToFigGrid(p); if(!isFinite(g.x)||!isFinite(g.y)) continue;
+      const fp=figGridToBox(g.x,g.y);
+      if(!jointTrail.has(k)) jointTrail.set(k,[]);
+      const arr=jointTrail.get(k); arr.push({x:fp.x,y:fp.y}); if(arr.length>FIG_TRAIL_LEN) arr.shift();
+      for(let i=0;i<arr.length;i++){
+        const f=i/(arr.length-1||1);
+        fill(dotHue, 90, 95, map(i,0,arr.length-1,80,220));
+        ellipse(arr[i].x,arr[i].y, 4*lerp(0.6,1,f), 4*lerp(0.6,1,f));
+      }
+    }
+  }
+  if (USE_CLIP) ctx.restore();
+}
+
+/* ===== grid/labels/util ===== */
+function drawDataGrid(){
+  if(!extent || !pTL || !pBR) return;
+  const ex = extentVis || extent;
+  let axMin, axMax, ayMin, ayMax, axName, ayName;
+  if (PROJECTION==='XY'){ axMin=ex.minX; axMax=ex.maxX; ayMin=ex.minY; ayMax=ex.maxY; axName='X'; ayName='Y'; }
+  else if (PROJECTION==='XZ'){ axMin=ex.minX; axMax=ex.maxX; ayMin=ex.minZ; ayMax=ex.maxZ; axName='X'; ayName='Z'; }
+  else { axMin=ex.minY; axMax=ex.maxY; ayMin=ex.minZ; ayMax=ex.maxZ; axName='Y'; ayName='Z'; }
+
+  const xtMajor=(DATA_TICK_MODE==='step')?ticksByFixedStep(axMin,axMax,DATA_STEP):niceTicks(axMin,axMax,DATA_TICKS);
+  const ytMajor=(DATA_TICK_MODE==='step')?ticksByFixedStep(ayMin,ayMax,DATA_STEP):niceTicks(ayMin,ayMax,DATA_TICKS);
+  const xtMinor=subticks(xtMajor.ticks,MINOR_SUBDIV), ytMinor=subticks(ytMajor.ticks,MINOR_SUBDIV);
+  const W2S=(wx,wy)=> (PROJECTION==='XY')?{x:(wx-cx)*s,y:(wy-cy)*-s}:(PROJECTION==='XZ')?{x:(wx-cx)*s,y:(wy-cz)*-s}:{x:(wx-cy)*s,y:(wy-cz)*-s};
+
+  push();
+  stroke(DATA_AXIS_COLOR[0],DATA_AXIS_COLOR[1],DATA_AXIS_COLOR[2],DATA_AXIS_COLOR[3]); strokeWeight(1.6); noFill();
+  rectMode(CORNERS); rect(pTL.x,pTL.y,pBR.x,pBR.y);
+
+  stroke(DATA_GRID_COLOR[0],DATA_GRID_COLOR[1],DATA_GRID_COLOR[2],DATA_GRID_COLOR[3]); strokeWeight(DATA_GRID_MINOR);
+  for(const v of xtMinor){ if(v<=axMin+1e-9||v>=axMax-1e-9) continue; const p1=W2S(v,ayMin), p2=W2S(v,ayMax); line(p1.x,p1.y,p2.x,p2.y); }
+  for(const v of ytMinor){ if(v<=ayMin+1e-9||v>=axMax-1e-9) continue; const p1=W2S(axMin,v), p2=W2S(axMax,v); line(p1.x,p1.y,p2.x,p2.y); }
+
+  strokeWeight(DATA_GRID_MAJOR);
+  for(const v of xtMajor.ticks){ const p1=W2S(v,ayMin), p2=W2S(v,ayMax); line(p1.x,p1.y,p2.x,p2.y); }
+  for(const v of ytMajor.ticks){ const p1=W2S(axMin,v), p2=W2S(axMax,v); line(p1.x,p1.y,p2.x,p2.y); }
+  pop();
+
+  // labels
+  push();
+  noStroke(); fill(DATA_LABEL_COLOR[0],DATA_LABEL_COLOR[1],DATA_LABEL_COLOR[2],DATA_LABEL_COLOR[3]);
+  textSize(AXIS_LABEL_SIZE); textAlign(CENTER,TOP);
+  for(const v of xtMajor.ticks){ const p=W2S(v,ayMin); text(formatNum(v, LABEL_DECIMALS), p.x, pBR.y + 8); }
+  textAlign(RIGHT,CENTER);
+  for(const v of ytMajor.ticks){ const p=W2S(axMin,v); text(formatNum(v, LABEL_DECIMALS), pTL.x - 8, p.y); }
+  textSize(AXIS_NAME_SIZE); textAlign(CENTER,BOTTOM);
+  text(axName+' (FBX units)', (pTL.x+pBR.x)/2, pBR.y - 6);
+  push(); translate(pTL.x + 10, (pTL.y+pBR.y)/2); rotate(-HALF_PI); textAlign(CENTER,TOP); text(ayName+' (FBX units)',0,0); pop();
+  pop();
+}
+function drawOverlay(frameI,timeSec){
+  if(!pTL||!pBR) return;
+  push(); rectMode(CORNER); noStroke(); textFont('Helvetica'); textSize(16); textAlign(LEFT,TOP);
+  const pad=12,bw=200,bh=48; fill(255,225); rect(pTL.x + pad - 6, pTL.y + pad - 6, bw, bh, 8);
+  fill(0,200); text(`Frame: ${frameI}`, pTL.x + pad, pTL.y + pad);
+  text(`Time: ${timeSec.toFixed(2)} s`, pTL.x + pad, pTL.y + pad + 22); pop();
+}
+function updateInfoBadge(){
+  const need=Object.keys(JOINT_ALIASES).length, have=jointToBone?Object.keys(jointToBone).length:0;
+  infoBadge.textContent=`Style: ${CURRENT_STYLE_KEY} · Axis: ${PROJECTION} · mapped ${have}/${need} · edges ${autoEdges.length}`;
+}
+function setTrailMid(){
+  if(trailSlider){
+    const minV=parseInt(trailSlider.min||"50"), maxV=parseInt(trailSlider.max||"4000");
+    const step=parseInt(trailSlider.step||"50");
+    const raw=(minV+maxV)/2;
+    const snapped = Math.round(raw/step)*step;
+    trailSlider.value = String(snapped);
+  }
+}
+function refreshBoneOptions(){
+  const part=partSel.value;
+  const bones=(part==='ALL')?Array.from(rowsByBone.keys()).sort():Array.from(bonesByPart.get(part)||[]).sort();
+  boneSel.innerHTML='<option value="">— all bones in part —</option>'+bones.map(b=>`<option value="${b}">${b}</option>`).join('');
+  rebuildSegments();
+}
+function niceTicks(min,max,count){ const span=max-min, step0=span/Math.max(1,count), pow10=Math.pow(10,Math.floor(Math.log10(step0)));
+  let step=pow10; const err=step0/pow10; if(err>=7.5) step=10*pow10; else if(err>=3.5) step=5*pow10; else if(err>=1.5) step=2*pow10;
+  const tmin=Math.ceil(min/step)*step, tmax=Math.floor(max/step)*step, ticks=[]; for(let v=tmin; v<=tmax+1e-9; v+=step) ticks.push(v); return {ticks, step}; }
+function ticksByFixedStep(min,max,step){ const s=(step<=0)?1:step, tmin=Math.ceil(min/s)*s, tmax=Math.floor(max/s)*s, ticks=[];
+  for(let v=tmin; v<=tmax+1e-9; v+=s) ticks.push(v); return {ticks, step:s}; }
+function subticks(majorTicks,subdiv){ if(majorTicks.length<2||subdiv<2) return []; const out=[];
+  for(let i=0;i<majorTicks.length-1;i++){ const a=majorTicks[i], b=majorTicks[i+1], st=(b-a)/subdiv; for(let k=1;k<subdiv;k++) out.push(a+st*k); } return out; }
+function formatNum(v,dec){ const m=Math.pow(10,dec); return String(Math.round(v*m)/m); }
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function norm(v,a,b){ return (v-a)/Math.max(1e-6,(b-a)); }
+function lerpHue(a,b,t){ let d=((b - a + 540) % 360) - 180; return (a + d*t + 360) % 360; }
+function updateLegendTone(hShift){
+  const hSlow=(HUE_SLOW + hShift) % 360;
+  const hFast=(HUE_FAST + hShift) % 360;
+  const hMid = (lerpHue(HUE_SLOW,HUE_FAST,0.5) + hShift) % 360;
+  dotSlow.style.background = `hsl(${hSlow}, 70%, 45%)`;
+  dotMid .style.background = `hsl(${hMid }, 90%, 52%)`;
+  dotFast.style.background = `hsl(${hFast}, 100%, 50%)`;
+}
+
+/* ===== input/keys ===== */
+function keyPressed(){
+  if(key===' ') { playing=!playing; return false; }
+  if(keyCode===LEFT_ARROW)  { animFrameF -= 1*FPS; if(animFrameF<minFrame) animFrameF=maxFrame - (minFrame-animFrameF) }
+  if(keyCode===RIGHT_ARROW) { animFrameF += 1*FPS; if(animFrameF>maxFrame) animFrameF=minFrame + (animFrameF-maxFrame) }
+  if(keyCode===UP_ARROW)    { tempoSlider.value = String(Math.min(2.5, parseFloat(tempoSlider.value)+0.1)); }
+  if(keyCode===DOWN_ARROW)  { tempoSlider.value = String(Math.max(0.2, parseFloat(tempoSlider.value)-0.1)); }
+  if(key==='S') saveCanvas('movement_map_shapes_multistyle','png');
+}
+function showErr(msg){ errBox.textContent=msg; errBox.style.display='block'; }
+</script>
+</body>
+</html>
