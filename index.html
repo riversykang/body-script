@@ -1,36 +1,34 @@
 <!doctype html>
-<html>
+<html lang="ko">
 <head>
-<meta charset="utf-8"/>
-<title>Movement Map — Speed Shapes (Multi-Style)</title>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
-<style>
-  html,body{margin:0;background:#fcfcfc;height:100%}
-  canvas{display:block;margin:0 auto}
-  .topbar{position:fixed;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;
-          padding:10px 12px;background:#fff;border-bottom:1px solid #00000014;z-index:10;
-          font:14px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-  .topbar .btn{padding:6px 10px;border-radius:10px;border:1px solid #00000022;background:#fff;cursor:pointer}
-  .topbar .btn.active{background:#111;color:#fff;border-color:#111}
-  .spacer{flex:1}
-  .badge{background:#00000012;padding:6px 10px;border-radius:10px;font:13px}
-  .ui{position:fixed;left:16px;bottom:16px;background:#ffffffcc;padding:10px 12px;border-radius:12px;
-      font:14px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.12)}
-  .ui label{display:block;margin:6px 0 2px;color:#333}
-  .ui input,.ui select{width:240px}
-  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .pill{padding:2px 8px;border-radius:999px;background:#00000010}
-  .legend{margin-top:6px;display:flex;gap:8px;flex-wrap:wrap}
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#0000000d}
-  .dot{width:10px;height:10px;border-radius:50%}
-  .error{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:#ffeded;color:#a40000;padding:8px 12px;border-radius:10px;font:13px;display:none;z-index:11}
-  .muted{font-size:12px;color:#555;margin-top:4px}
-  body{padding-top:52px}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Movement Map — Speed Shapes (Multi‑Style) — Graphic Trails + Figure (Fingers)</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <style>
+    :root{--panel:#ffffff;--border:#00000022;--ink:#111;--muted:#667085}
+    html,body{margin:0;height:100%;background:#fcfcfc;color:#111;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    canvas{display:block;margin:0 auto}
+    .topbar{position:fixed;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;
+            padding:10px 12px;background:#fff;border-bottom:1px solid var(--border);z-index:10;font-size:14px}
+    .topbar .btn{padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer}
+    .topbar .btn.active{background:#111;color:#fff;border-color:#111}
+    .spacer{flex:1}
+    .badge{background:#00000012;padding:6px 10px;border-radius:10px;font-size:13px}
+    .ui{position:fixed;left:16px;bottom:16px;background:#ffffffcc;padding:10px 12px;border-radius:12px;
+        font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.12);backdrop-filter:blur(6px)}
+    .ui label{display:block;margin:6px 0 2px;color:#333}
+    .ui input,.ui select{width:260px}
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .pill{padding:2px 8px;border-radius:999px;background:#00000010}
+    .legend{margin-top:6px;display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#0000000d}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .error{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:#ffeded;color:#a40000;padding:8px 12px;border-radius:10px;font:13px;display:none;z-index:11}
+    body{padding-top:52px}
+  </style>
 </head>
 <body>
-
 <div class="topbar" id="styleBar">
   <strong>Styles:</strong>
   <div class="spacer"></div>
@@ -62,23 +60,41 @@
   <label>Bone (optional)</label>
   <select id="boneSel"><option value="">— all bones in part —</option></select>
 
-  <label>Style</label>
+  <label>Render Mode</label>
   <select id="renderMode">
     <option value="lines">Trail Lines (color = speed)</option>
     <option value="shapes" selected>Speed Shapes (size = speed)</option>
+    <optgroup label="Graphic Trails">
+      <option value="flow">Flow Field (graphic)</option>
+      <option value="path">Particles Along Path</option>
+      <option value="magic">Magic Glow Trail</option>
+      <option value="metallic">Metallic Gradient</option>
+      <option value="fibo">Fibonacci Spiral</option>
+      <option value="shards">Shards (bold graphic)</option>
+      <option value="ribbon">Ribbon Twist</option>
+      <option value="brush">Bristle Brush</option>
+      <option value="hatch">Hatch / Screentone</option>
+      <option value="noisebrush">Noise Texture Brush</option>
+      <option value="stippling">Stippling Dots</option>
+    </optgroup>
+    <optgroup label="Experimental">
+      <option value="orbit">Orbit Ribbons</option>
+      <option value="voronoi">Voronoi Sparks</option>
+      <option value="glitch">Glitch Scanlines</option>
+      <option value="ink">Ink Bleed</option>
+      <option value="emboss">Emboss Trails</option>
+      <option value="halftone">Tiled Halftone</option>
+      <option value="weave">Ribbon Weave</option>
+      <option value="electric">Electric Field</option>
+    </optgroup>
   </select>
 
-  <label>Shape</label>
-  <select id="shapeSel">
-    <option value="circle" selected>Circle</option>
-    <option value="square">Square</option>
-    <option value="triangle">Triangle</option>
-  </select>
+  <label>Background</label>
+  <label class="row" style="gap:6px;align-items:center">
+    <input type="checkbox" id="bgToggle"> <span>Dark background</span>
+  </label>
 
-  <label>Shape Size</label>
-  <input id="shapeSize" type="range" min="0.5" max="3.0" step="0.1" value="1.4">
-
-  <label>Tempo (speed & smooth)</label>
+  <label>Tempo</label>
   <input id="tempo" type="range" min="0.2" max="2.5" step="0.1" value="0.9">
 
   <label>Trail (segments)</label>
@@ -87,30 +103,20 @@
   <label>Tone (hue shift)</label>
   <input id="tone" type="range" min="0" max="360" step="1" value="0">
 
-  <label><input id="colorBySpeed" type="checkbox" checked> Color encodes speed (for Shapes mode)</label>
-  <div class="muted">기본은 <u>크기=속도</u>. 체크 시 <u>색상도</u> 속도에 반응.</div>
-
-  <label><input id="showFig" type="checkbox" checked> Show Figure (right-bottom)</label>
-  <label><input id="showAllDots" type="checkbox" checked> Show all joints dots</label>
+  <label>Particle Size</label>
+  <input id="psize" type="range" min="0.5" max="3.0" step="0.1" value="1.0">
 
   <div class="legend">
     <span class="chip"><span id="dotSlow" class="dot"></span>slow</span>
     <span class="chip"><span id="dotMid"  class="dot"></span>mid</span>
     <span class="chip"><span id="dotFast" class="dot"></span>fast</span>
   </div>
-  <div style="margin-top:6px;color:#333">␣: play/pause · ←/→: ±1s(루프) · ↑/↓: tempo · S: PNG</div>
 </div>
 
 <div class="error" id="errBox"></div>
 
 <script>
-/* ===================== DEBUG / OPTIONS ===================== */
-const DEBUG = false;
-const USE_CLIP = true;
-const SHOW_FIG_JOINT_DOTS = false;
-const SHOW_FIG_TRAIL = false;
-
-/* ===================== MULTI-STYLE ===================== */
+/* ===================== CONFIG / DATA SETUP ===================== */
 const BASE_PATH = "";
 const STYLES = [
   ["popping","Popping"],
@@ -120,13 +126,14 @@ const STYLES = [
   ["waacking","Waacking"],
   ["Haka","Haka"],
   ["irishtap","Irish Tap"],
-  ["traditionalkorean","Traditional Korean"],
+  ["traditionalkorean","Traditional Korean"]
 ];
 let CURRENT_STYLE_KEY = "popping";
 
-/* ===================== CONFIG ===================== */
-let CSV_NAME = "";
-let PANEL_RATIO=0.62, L_W, R_W; const BG=252;
+let BG_LIGHT=252, BG_DARK=12; let useDarkBg=false;
+let pSize=1.0;
+
+let PANEL_RATIO=0.62, L_W, R_W; 
 let PROJECTION='XZ';
 const SCALE_MAG=0.86, MARGIN=80;
 const FPS=30;
@@ -136,40 +143,31 @@ const CURVE_SUBDIV_FACTOR=0.16, SMOOTH_ALPHA_BASE=0.18, FRAME_SKIP=1;
 const DATA_TICK_MODE='count', DATA_TICKS=10, DATA_STEP=0.1, MINOR_SUBDIV=4;
 const AXIS_LABEL_SIZE=12, AXIS_NAME_SIZE=12, LABEL_DECIMALS=2;
 const DATA_GRID_COLOR=[0,0,0,26], DATA_GRID_MAJOR=1.0, DATA_GRID_MINOR=0.6, DATA_AXIS_COLOR=[0,0,0,140], DATA_LABEL_COLOR=[0,0,0,190];
-
-/* ===== Figure box config ===== */
-const FIG_BASE_SIZE = 260;
-const FIG_PAD = 16;
-const FIG_MARGIN = 8;
-
-/* ===== Figure drawing params ===== */
-const FIG_BONE_W=3.2, FIG_TRAIL_LEN=10;
+/* Figure box */
+const FIG_BASE_SIZE = 260, FIG_PAD=16, FIG_MARGIN=8, FIG_BONE_W=3.2;
 
 /* ===================== DATA & STATE ===================== */
 let table, extent, extentVis, rows, bonesByPart, rowsByBone;
 let segments, orderedSegs, contextLines;
-let cx,cy,cz,s,pTL,pBR;               // 좌측 그리드용 뷰 파라미터
-let fcx,fcy,fcz,fs,fpTL,fpBR;         // figure(전체 몸) 전용 뷰 파라미터
+let cx,cy,cz,s,pTL,pBR;               // left grid
+let fcx,fcy,fcz,fs,fpTL,fpBR;         // figure grid
 let lastMillis=0, playing=true;
 let animFrameF=0, minFrame=0, maxFrame=0;
 
-let activeBones = new Set();          // 좌측 그리드에 표시되는 본들
-let allVisibleBones = new Set();      // figure가 항상 사용할 전체 본 집합
+let activeBones = new Set();
+let allVisibleBones = new Set();
 
-/* ===== dynamic figure box state ===== */
 let figBox = { cx:null, cy:null, size:FIG_BASE_SIZE };
 
-/* ===================== UI refs ===================== */
-let partSel,boneSel,tempoSlider,trailSlider,toneSlider,showFig,statePill,errBox,infoBadge;
+let partSel,boneSel,tempoSlider,trailSlider,toneSlider,psizeSlider,statePill,errBox,infoBadge,bgToggle;
 let btnXZ,btnXY,btnYZ, dotSlow,dotMid,dotFast;
-let renderModeSel, shapeSel, shapeSizeSlider, colorBySpeedChk;
+let renderModeSel;
+const idxCache=new Map(), figState=new Map();
 
-/* ===== figure state ===== */
-const idxCache=new Map(), jointTrail=new Map(), figState=new Map();
-
-/* ===== aliases/chains ===== */
+/* ===================== JOINT MAPPING (auto stick figure with fingers) ===================== */
 const AL=a=>a;
-const JOINT_ALIASES={ Hips:AL(['pelvis','hips','root','root.x']),
+const JOINT_ALIASES={
+  Hips:AL(['pelvis','hips','root','root.x']),
   Spine1:AL(['spine_01']), Spine2:AL(['spine_02']), Spine3:AL(['spine_03']), Spine4:AL(['spine_04']), Spine5:AL(['spine_05']),
   Neck1:AL(['neck_01']), Neck2:AL(['neck_02']), Head:AL(['head']),
   LClav:AL(['clavicle_l','clavicle.l']), RClav:AL(['clavicle_r','clavicle.r']),
@@ -177,39 +175,74 @@ const JOINT_ALIASES={ Hips:AL(['pelvis','hips','root','root.x']),
   LLowerArm:AL(['lowerarm_l','lowerarm.l']), RLowerArm:AL(['lowerarm_r','lowerarm.r']),
   LWrist:AL(['hand_l','wrist_inner_l','wrist_outer_l','hand.l']),
   RWrist:AL(['hand_r','wrist_inner_r','wrist_outer_r','hand.r']),
-  LIndexMC:AL(['index_metacarpal_l']),LIndex1:AL(['index_01_l']),LIndex2:AL(['index_02_l']),LIndex3:AL(['index_03_l']),
-  LMiddleMC:AL(['middle_metacarpal_l']),LMiddle1:AL(['middle_01_l']),LMiddle2:AL(['middle_02_l']),LMiddle3:AL(['middle_03_l']),
-  LRingMC:AL(['ring_metacarpal_l']),LRing1:AL(['ring_01_l']),LRing2:AL(['ring_02_l']),LRing3:AL(['ring_03_l']),
-  LPinkyMC:AL(['pinky_metacarpal_l']),LPinky1:AL(['pinky_01_l']),LPinky2:AL(['pinky_02_l']),LPinky3:AL(['pinky_03_l']),
-  LThumb1:AL(['thumb_01_l']),LThumb2:AL(['thumb_02_l']),LThumb3:AL(['thumb_03_l']),
-  RIndexMC:AL(['index_metacarpal_r']),RIndex1:AL(['index_01_r']),RIndex2:AL(['index_02_r']),RIndex3:AL(['index_03_r']),
-  RMiddleMC:AL(['middle_metacarpal_r']),RMiddle1:AL(['middle_01_r']),RMiddle2:AL(['middle_02_r']),RMiddle3:AL(['middle_03_r']),
-  RRingMC:AL(['ring_metacarpal_r']),RRing1:AL(['ring_01_r']),RRing2:AL(['ring_02_r']),RRing3:AL(['ring_03_r']),
-  RPinkyMC:AL(['pinky_metacarpal_r']),RPinky1:AL(['pinky_01_r']),RPinky2:AL(['pinky_02_r']),RPinky3:AL(['pinky_03_r']),
-  RThumb1:AL(['thumb_01_r']),RThumb2:AL(['thumb_02_r']),RThumb3:AL(['thumb_03_r']),
-  LThigh:AL(['thigh_l']),LKnee:AL(['calf_l','knee_l']),LAnkle:AL(['foot_l','ankle_l']),LBall:AL(['ball_l','toebase_l']),
-  RThigh:AL(['thigh_r']),RKnee:AL(['calf_r','knee_r']),RAnkle:AL(['foot_r','ankle_r']),RBall:AL(['ball_r','toebase_r'])};
+  // Left fingers
+  LThumb1:AL(['thumb_01_l','thumb1_l','thumbproximal_l','thumb.01.l','thumb1.l']),
+  LThumb2:AL(['thumb_02_l','thumb2_l','thumbintermediate_l','thumb.02.l','thumb2.l']),
+  LThumb3:AL(['thumb_03_l','thumb3_l','thumbdistal_l','thumb.03.l','thumb3.l']),
+  LThumbTip:AL(['thumb_end_l','thumb_04_l','thumbtip_l','thumb.end.l','thumb4.l']),
+  LIndex1:AL(['index_01_l','index1_l','indexproximal_l','index.01.l','index1.l']),
+  LIndex2:AL(['index_02_l','index2_l','indexintermediate_l','index.02.l','index2.l']),
+  LIndex3:AL(['index_03_l','index3_l','indexdistal_l','index.03.l','index3.l']),
+  LIndexTip:AL(['index_end_l','index_04_l','indextip_l','index.end.l','index4.l']),
+  LMiddle1:AL(['middle_01_l','middle1_l','middleproximal_l','middle.01.l','middle1.l']),
+  LMiddle2:AL(['middle_02_l','middle2_l','middleintermediate_l','middle.02.l','middle2.l']),
+  LMiddle3:AL(['middle_03_l','middle3_l','middledistal_l','middle.03.l','middle3.l']),
+  LMiddleTip:AL(['middle_end_l','middle_04_l','middletip_l','middle.end.l','middle4.l']),
+  LRing1:AL(['ring_01_l','ring1_l','ringproximal_l','ring.01.l','ring1.l']),
+  LRing2:AL(['ring_02_l','ring2_l','ringintermediate_l','ring.02.l','ring2.l']),
+  LRing3:AL(['ring_03_l','ring3_l','ringdistal_l','ring.03.l','ring3.l']),
+  LRingTip:AL(['ring_end_l','ring_04_l','ringtip_l','ring.end.l','ring4.l']),
+  LPinky1:AL(['pinky_01_l','little_01_l','pinky1_l','pinkyproximal_l','pinky.01.l','pinky1.l','little1.l']),
+  LPinky2:AL(['pinky_02_l','little_02_l','pinky2_l','pinkyintermediate_l','pinky.02.l','pinky2.l','little2.l']),
+  LPinky3:AL(['pinky_03_l','little_03_l','pinky3_l','pinkydistal_l','pinky.03.l','pinky3.l','little3.l']),
+  LPinkyTip:AL(['pinky_end_l','little_end_l','pinky_04_l','pinkytip_l','pinky.end.l','pinky4.l','little4.l']),
+  // Right fingers
+  RThumb1:AL(['thumb_01_r','thumb1_r','thumbproximal_r','thumb.01.r','thumb1.r']),
+  RThumb2:AL(['thumb_02_r','thumb2_r','thumbintermediate_r','thumb.02.r','thumb2.r']),
+  RThumb3:AL(['thumb_03_r','thumb3_r','thumbdistal_r','thumb.03.r','thumb3.r']),
+  RThumbTip:AL(['thumb_end_r','thumb_04_r','thumbtip_r','thumb.end.r','thumb4.r']),
+  RIndex1:AL(['index_01_r','index1_r','indexproximal_r','index.01.r','index1.r']),
+  RIndex2:AL(['index_02_r','index2_r','indexintermediate_r','index.02.r','index2.r']),
+  RIndex3:AL(['index_03_r','index3_r','indexdistal_r','index.03.r','index3.r']),
+  RIndexTip:AL(['index_end_r','index_04_r','indextip_r','index.end.r','index4.r']),
+  RMiddle1:AL(['middle_01_r','middle1_r','middleproximal_r','middle.01.r','middle1.r']),
+  RMiddle2:AL(['middle_02_r','middle2_r','middleintermediate_r','middle.02.r','middle2.r']),
+  RMiddle3:AL(['middle_03_r','middle3_r','middledistal_r','middle.03.r','middle3.r']),
+  RMiddleTip:AL(['middle_end_r','middle_04_r','middletip_r','middle.end.r','middle4.r']),
+  RRing1:AL(['ring_01_r','ring1_r','ringproximal_r','ring.01.r','ring1.r']),
+  RRing2:AL(['ring_02_r','ring2_r','ringintermediate_r','ring.02.r','ring2.r']),
+  RRing3:AL(['ring_03_r','ring3_r','ringdistal_r','ring.03.r','ring3.r']),
+  RRingTip:AL(['ring_end_r','ring_04_r','ringtip_r','ring.end.r','ring4.r']),
+  RPinky1:AL(['pinky_01_r','little_01_r','pinky1_r','pinkyproximal_r','pinky.01.r','pinky1.r','little1.r']),
+  RPinky2:AL(['pinky_02_r','little_02_r','pinky2_r','pinkyintermediate_r','pinky.02.r','pinky2.r','little2.r']),
+  RPinky3:AL(['pinky_03_r','little_03_r','pinky3_r','pinkydistal_r','pinky.03.r','pinky3.r','little3.r']),
+  RPinkyTip:AL(['pinky_end_r','little_end_r','pinky_04_r','pinkytip_r','pinky.end.r','pinky4.r','little4.r'])
+};
 const STICK_CHAINS=[
   ['Hips','Spine1','Spine2','Spine3','Spine4','Spine5','Neck1','Neck2','Head'],
-  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist','LIndexMC','LIndex1','LIndex2','LIndex3'],
-  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist','LMiddleMC','LMiddle1','LMiddle2','LMiddle3'],
-  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist','LRingMC','LRing1','LRing2','LRing3'],
-  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist','LPinkyMC','LPinky1','LPinky2','LPinky3'],
-  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RIndexMC','RIndex1','RIndex2','RIndex3'],
-  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RMiddleMC','RMiddle1','RMiddle2','RMiddle3'],
-  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RRingMC','RRing1','RRing2','RRing3'],
-  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RPinkyMC','RPinky1','RPinky2','RPinky3'],
-  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist','RThumb1','RThumb2','RThumb3'],
   ['Hips','LThigh','LKnee','LAnkle','LBall'],
   ['Hips','RThigh','RKnee','RAnkle','RBall'],
+  ['Spine3','LClav','LUpperArm','LLowerArm','LWrist'],
+  ['Spine3','RClav','RUpperArm','RLowerArm','RWrist'],
+  // Fingers (left)
+  ['LWrist','LThumb1','LThumb2','LThumb3','LThumbTip'],
+  ['LWrist','LIndex1','LIndex2','LIndex3','LIndexTip'],
+  ['LWrist','LMiddle1','LMiddle2','LMiddle3','LMiddleTip'],
+  ['LWrist','LRing1','LRing2','LRing3','LRingTip'],
+  ['LWrist','LPinky1','LPinky2','LPinky3','LPinkyTip'],
+  // Fingers (right)
+  ['RWrist','RThumb1','RThumb2','RThumb3','RThumbTip'],
+  ['RWrist','RIndex1','RIndex2','RIndex3','RIndexTip'],
+  ['RWrist','RMiddle1','RMiddle2','RMiddle3','RMiddleTip'],
+  ['RWrist','RRing1','RRing2','RRing3','RRingTip'],
+  ['RWrist','RPinky1','RPinky2','RPinky3','RPinkyTip']
 ];
-
-/* ===================== helpers ===================== */
 const normName=s=>(s||'').toLowerCase().replace(/^mixamorig[:]?/,'').replace(/[^a-z0-9_.]/g,'');
 function isHiddenBone(name){
   const n=normName(name);
   return n==='root'||n.startsWith('root.')||n==='ik_hand_root'||n==='ik_foot_root'||n==='center_of_mass'||n==='centerofmass'||n==='interaction';
 }
+let jointToBone=null, autoEdges=[];
 function scoredCandidates(aliases){
   const keys=Array.from(rowsByBone.keys()); const out=[];
   for(const k of keys){ const nk=normName(k); let score=0;
@@ -218,38 +251,18 @@ function scoredCandidates(aliases){
     } out.push({name:k,score});
   } return out.filter(c=>c.score>0).sort((a,b)=>b.score-a.score);
 }
-const lrBonus=(name,side)=>{const s=normName(name);const L=/(\.l|_l|left)/.test(s),R=/(\.r|_r|right)/.test(s);return side==='L'?(L?+60:0)+(R?-40:0):side==='R'?(R?+60:0)+(L?-40:0):0;}
-let jointToBone=null, autoEdges=[];
 function buildJointMapping(){
   jointToBone={}; autoEdges=[];
-  for(const j of ['Hips','Spine1','Spine2','Spine3','Spine4','Spine5','Neck1','Neck2','Head']){
-    const c=scoredCandidates(JOINT_ALIASES[j]); if(c[0]) jointToBone[j]=c[0].name;
-  }
-  const pair=(L,R)=>{
-    const l=scoredCandidates(JOINT_ALIASES[L]).map(c=>({name:c.name,score:c.score+lrBonus(c.name,'L')}));
-    const r=scoredCandidates(JOINT_ALIASES[R]).map(c=>({name:c.name,score:c.score+lrBonus(c.name,'R')}));
-    l.sort((a,b)=> b.score - a.score); r.sort((a,b)=> b.score - a.score);
-    let Lb=l[0],Rb=r[0];
-    if(Lb&&Rb&&Lb.name===Rb.name){
-      const l2=l[1],r2=r[1];
-      if(l2&&(!r2||l2.score>=r2.score)) Rb=r2||Rb; else if(r2) Lb=l2;
-    }
-    if(Lb) jointToBone[L]=Lb.name; if(Rb) jointToBone[R]=Rb.name;
-  };
-  ['Clav','UpperArm','LowerArm','Wrist','Thigh','Knee','Ankle','Ball',
-   'IndexMC','Index1','Index2','Index3','MiddleMC','Middle1','Middle2','Middle3',
-   'RingMC','Ring1','Ring2','Ring3','PinkyMC','Pinky1','Pinky2','Pinky3','Thumb1','Thumb2','Thumb3']
-   .forEach(suf=>pair(`L${suf}`,`R${suf}`));
-  for(const chain of STICK_CHAINS){
-    let prev=null; for(const j of chain){ if(!jointToBone[j]){ prev=null; continue; } if(prev) autoEdges.push([prev,j]); prev=j; }
-  }
+  const pick=(key)=>{ const c=scoredCandidates(JOINT_ALIASES[key]||[]); if(c[0]) jointToBone[key]=c[0].name; };
+  Object.keys(JOINT_ALIASES).forEach(pick);
+  for(const chain of STICK_CHAINS){ let prev=null; for(const j of chain){ const bn=jointToBone[j]; if(!bn){ prev=null; continue; } if(prev) autoEdges.push([prev,j]); prev=j; } }
 }
 
-/* ===================== p5 lifecycle ===================== */
+/* ===================== LIFECYCLE ===================== */
 function preload(){
-  CSV_NAME = `${BASE_PATH}all_bones_coords_${CURRENT_STYLE_KEY}.csv`;
+  const CSV_NAME = `${BASE_PATH}all_bones_coords_${CURRENT_STYLE_KEY}.csv`;
   table=loadTable(CSV_NAME,'csv','header',
-    ()=>console.log('CSV loaded:', location.origin + '/' + CSV_NAME),
+    ()=>console.log('CSV loaded:', CSV_NAME),
     e=>{console.error('CSV load error',e); showErr('CSV를 불러오지 못했습니다: '+CSV_NAME);} 
   );
 }
@@ -260,16 +273,21 @@ function setup(){
   // UI refs
   partSel=document.getElementById('partSel'); boneSel=document.getElementById('boneSel');
   tempoSlider=document.getElementById('tempo'); trailSlider=document.getElementById('trail');
-  toneSlider=document.getElementById('tone');
-  showFig=document.getElementById('showFig');
+  toneSlider=document.getElementById('tone'); psizeSlider=document.getElementById('psize');
   statePill=document.getElementById('statePill'); errBox=document.getElementById('errBox'); infoBadge=document.getElementById('infoBadge');
   btnXZ=document.getElementById('btnXZ'); btnXY=document.getElementById('btnXY'); btnYZ=document.getElementById('btnYZ');
   btnXZ.onclick=()=>setProjection('XZ'); btnXY.onclick=()=>setProjection('XY'); btnYZ.onclick=()=>setProjection('YZ');
-
+  bgToggle=document.getElementById('bgToggle');
   renderModeSel=document.getElementById('renderMode');
-  shapeSel=document.getElementById('shapeSel');
-  shapeSizeSlider=document.getElementById('shapeSize');
-  colorBySpeedChk=document.getElementById('colorBySpeed');
+
+  bgToggle.addEventListener('change',()=>{useDarkBg=bgToggle.checked;});
+  renderModeSel.addEventListener('change',()=>{
+    const m=renderModeSel.value;
+    if(m==='magic' || m==='metallic' || m==='electric'){ bgToggle.checked=true; }
+    useDarkBg=bgToggle.checked;
+  });
+
+  psizeSlider.addEventListener('input', ()=>{ pSize=parseFloat(psizeSlider.value||'1.0'); });
 
   dotSlow=document.getElementById('dotSlow'); dotMid=document.getElementById('dotMid'); dotFast=document.getElementById('dotFast');
   toneSlider.addEventListener('input', ()=>updateLegendTone(parseInt(toneSlider.value||0)));
@@ -278,31 +296,28 @@ function setup(){
   parseTableAndBuild();
   setProjection('XZ');
   setTrailMid();
-
-  // 새로고침마다 tone 랜덤
   const randTone = Math.floor(Math.random()*361);
   toneSlider.value = String(randTone);
   updateLegendTone(randTone);
-
   updateInfoBadge();
+
+  // Part/Bone 즉시 반영
+  partSel.addEventListener('change', ()=>{ refreshBoneOptions(); rebuildSegments(); });
+  boneSel.addEventListener('change', ()=>{ rebuildSegments(); });
 }
 window.addEventListener('error', e=>{ const b=document.getElementById('errBox'); b.textContent=e.message; b.style.display='block'; });
 
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
-  computePanels();
-  computeView();
-  computeFigureView();
-  rebuildSegments();
+  computePanels(); computeView(); computeFigureView(); rebuildSegments();
 }
 
-/* ====== parse/build ====== */
+/* ===================== PARSE / BUILD ===================== */
 function parseTableAndBuild(){
   extent={minX:1e9,maxX:-1e9,minY:1e9,maxY:-1e9,minZ:1e9,maxZ:-1e9};
-  rows=[]; bonesByPart=new Map(); rowsByBone=new Map();
-  segments=[]; orderedSegs=[]; contextLines=[];
+  rows=[]; bonesByPart=new Map(); rowsByBone=new Map(); segments=[]; orderedSegs=[]; contextLines=[];
   jointToBone=null; autoEdges=[];
-  idxCache.clear(); jointTrail.clear(); figState.clear();
+  idxCache.clear(); figState.clear();
 
   if(!table || table.getRowCount()===0){ showErr('CSV가 비었거나 로드 실패'); noLoop(); return; }
 
@@ -324,51 +339,52 @@ function parseTableAndBuild(){
   }
   for(const [k,arr] of rowsByBone) arr.sort((a,b)=>a.f-b.f);
 
-  if(partSel){
-    partSel.addEventListener('change', refreshBoneOptions);
-    boneSel.addEventListener('change', ()=>rebuildSegments());
-  }
   refreshBoneOptions();
-
-  computeView();
-  computeFigureView();
+  computeView(); computeFigureView();
   buildJointMapping();
   rebuildSegments();
   animFrameF=minFrame; lastMillis=millis();
 }
 
-/* ====== style buttons ====== */
+function refreshBoneOptions(){
+  if(!boneSel) return;
+  const part = partSel ? partSel.value : 'ALL';
+  let bones = [];
+  if(part === 'ALL'){
+    bones = Array.from(rowsByBone ? rowsByBone.keys() : []);
+  } else {
+    bones = Array.from(bonesByPart && bonesByPart.get(part) ? bonesByPart.get(part) : []);
+  }
+  bones = bones.filter(b=>!isHiddenBone(b)).sort();
+  boneSel.innerHTML = '<option value="">— all bones in part —</option>' + bones.map(b=>`<option value="${b}">${b}</option>`).join('');
+}
+
 function buildStyleButtons(){
   const bar=document.getElementById('styleBar');
-  [...bar.querySelectorAll(".btn[data-style]")].forEach(b=>b.remove());
   STYLES.forEach(([key,label])=>{
     const btn=document.createElement('button');
     btn.className='btn'; btn.dataset.style=key; btn.textContent=label;
     if(key===CURRENT_STYLE_KEY) btn.classList.add('active');
     btn.onclick=()=>{
       [...bar.querySelectorAll('.btn[data-style]')].forEach(b=>b.classList.toggle('active', b===btn));
-      switchStyle(key,label);
+      CURRENT_STYLE_KEY=key;
+      const CSV_NAME = `${BASE_PATH}all_bones_coords_${key}.csv`;
+      statePill.textContent='loading…';
+      loadTable(CSV_NAME,'csv','header',
+        (tbl)=>{ table=tbl; parseTableAndBuild(); setTrailMid(); updateLegendTone(parseInt(toneSlider.value||0)); statePill.textContent='ready'; },
+        (e)=>{ console.error('CSV load error',e); showErr('CSV를 불러오지 못했습니다: '+CSV_NAME); statePill.textContent='error'; }
+      );
     };
     bar.insertBefore(btn, bar.querySelector('.spacer'));
   });
 }
-function switchStyle(key,labelText){
-  CURRENT_STYLE_KEY=key;
-  CSV_NAME = `${BASE_PATH}all_bones_coords_${key}.csv`;
-  statePill.textContent='loading…';
-  loadTable(CSV_NAME,'csv','header',
-    (tbl)=>{ table=tbl; parseTableAndBuild(); setTrailMid(); updateLegendTone(parseInt(toneSlider.value||0)); statePill.textContent='ready'; },
-    (e)=>{ console.error('CSV load error',e); showErr('CSV를 불러오지 못했습니다: '+CSV_NAME); statePill.textContent='error'; }
-  );
-}
 
-/* ====== projection/view ====== */
+/* ===================== VIEW / GRID ===================== */
 function computePanels(){ L_W=Math.floor(width*PANEL_RATIO); R_W=width-L_W; }
 function setProjection(mode){
   PROJECTION=mode;
   btnXZ.classList.toggle('active',mode==='XZ'); btnXY.classList.toggle('active',mode==='XY'); btnYZ.classList.toggle('active',mode==='YZ');
-  rebuildSegments();     // 내부에서 extentVis 계산 후 computeView 호출
-  computeFigureView();   // figure 전용 뷰도 갱신
+  rebuildSegments(); computeFigureView();
 }
 function computeView(){
   const ex = extentVis || extent; if(!ex) return;
@@ -385,7 +401,7 @@ function computeView(){
   else { pTL=W2S(ex.minY,ex.maxZ); pBR=W2S(ex.maxY,ex.minZ); }
 }
 function computeFigureView(){
-  const ex = extent; if(!ex) return; // 항상 전체 범위
+  const ex = extent; if(!ex) return;
   const spanX=Math.max(1e-6,ex.maxX-ex.minX), spanY=Math.max(1e-6,ex.maxY-ex.minY), spanZ=Math.max(1e-6,ex.maxZ-ex.minZ);
   fcx=(ex.minX+ex.maxX)/2; fcy=(ex.minY+ex.maxY)/2; fcz=(ex.minZ+ex.maxZ)/2;
   let sx,sy;
@@ -399,248 +415,6 @@ function computeFigureView(){
   else { fpTL=W2S(ex.minY,ex.maxZ); fpBR=W2S(ex.maxY,ex.minZ); }
 }
 
-/* ====== segments ====== */
-function rebuildSegments(){
-  if(!rowsByBone) return;
-  segments=[]; orderedSegs=[]; contextLines=[];
-  extentVis = {minX:1e9,maxX:-1e9,minY:1e9,maxY:-1e9,minZ:1e9,maxZ:-1e9};
-  const part=partSel.value, boneFilter=boneSel.value;
-
-  // Figure(전체) 본 집합
-  allVisibleBones = new Set([...rowsByBone.keys()].filter(b=>!isHiddenBone(b)));
-
-  // 1) 먼저 사용 범위 계산만 수행
-  const candidates=(boneFilter)?[boneFilter]:(part==='ALL'?Array.from(rowsByBone.keys()):Array.from(bonesByPart.get(part)||[]));
-  const useBones=candidates.filter(b=>!isHiddenBone(b));
-  activeBones = new Set(useBones);
-
-  let updatedVis=false;
-  for(const b of useBones){
-    const arrFull=(rowsByBone.get(b)||[]);
-    for(const q of arrFull){
-      if(q.x<extentVis.minX) extentVis.minX=q.x; if(q.x>extentVis.maxX) extentVis.maxX=q.x;
-      if(q.y<extentVis.minY) extentVis.minY=q.y; if(q.y>extentVis.maxY) extentVis.maxY=q.y;
-      if(q.z<extentVis.minZ) extentVis.minZ=q.z; if(q.z>extentVis.maxZ) extentVis.maxZ=q.z;
-      updatedVis=true;
-    }
-  }
-  if(!updatedVis){ extentVis = extent; }   // 안전장치
-
-  // 2) 새 범위로 스케일/센터 갱신
-  computeView();
-  computeFigureView();
-
-  // 3) 이제 화면 좌표 생성
-  const W2S=(o)=> (PROJECTION==='XY')?{x:(o.x-cx)*s,y:(o.y-cy)*-s}:(PROJECTION==='XZ')?{x:(o.x-cx)*s,y:(o.z-cz)*-s}:{x:(o.y-cy)*s,y:(o.z-cz)*-s};
-  let allSpeeds=[];
-  for(const b of useBones){
-    const arrFull=(rowsByBone.get(b)||[]);
-    const arr=arrFull.filter((_,i)=>(i%FRAME_SKIP)===0);
-    if(arr.length<2) continue;
-    const pts=[];
-    for(let i=1;i<arr.length;i++){
-      const prev=arr[i-1], curr=arr[i]; const p0=W2S(prev), p1=W2S(curr); pts.push(p0);
-      const d=dist(p0.x,p0.y,p1.x,p1.y), n=Math.max(1,int(d*CURVE_SUBDIV_FACTOR)); let pv=p0;
-      for(let k=1;k<=n;k++){
-        const t=k/n, x=lerp(p0.x,p1.x,t), y=lerp(p0.y,p1.y,t), spd=dist(pv.x,pv.y,x,y), frameF=lerp(prev.f,curr.f,t);
-        segments.push({a:{...pv}, b:{x,y}, spd, frameF}); allSpeeds.push(spd); pv={x,y};
-      }
-      if(i===arr.length-1) pts.push(p1);
-    }
-    contextLines.push(pts);
-  }
-  if(segments.length===0){ statePill.textContent='no data'; return; }
-
-  allSpeeds.sort((a,b)=>a-b); const q=p=>allSpeeds[int(constrain(p*(allSpeeds.length-1),0,allSpeeds.length-1))];
-  const SLOW=q(0.10), FAST=q(0.95);
-  const tVals=segments.map(sg=>norm(clamp(sg.spd,SLOW,FAST),SLOW,FAST)); const sm=new Array(tVals.length); sm[0]=tVals[0];
-  for(let i=1;i<tVals.length;i++) sm[i]=lerp(sm[i-1],tVals[i],SMOOTH_ALPHA_BASE);
-  segments.forEach((sg,i)=>sg.tSm=sm[i]);
-  orderedSegs=segments.slice().sort((a,b)=>a.frameF-b.frameF);
-  statePill.textContent='ready'; updateInfoBadge();
-}
-
-/* ====== sampling ====== */
-function sampleBoneAtFrameF(bone, frameF){
-  const arr=rowsByBone.get(bone); if(!arr||arr.length===0) return null;
-  let i=idxCache.get(bone)||0; while(i<arr.length-2&&arr[i+1].f<frameF)i++; while(i>0&&arr[i].f>frameF)i--; idxCache.set(bone,i);
-  const a=arr[i], b=arr[Math.min(i+1,arr.length-1)];
-  const denom = Math.max(1e-6, (b.f - a.f));
-  const t = constrain((frameF - a.f)/denom, 0, 1);
-  if(!isFinite(t)) return {x:a.x, y:a.y, z:a.z};
-  return {x:lerp(a.x,b.x,t), y:lerp(a.y,b.y,t), z:lerp(a.z,b.z,t)};
-}
-
-/* ===================== draw ===================== */
-function draw(){
-  const now=millis(), dt=(now-lastMillis)/1000; lastMillis=now;
-  background(BG);
-
-  if(!orderedSegs || !extent || !pTL || !pBR){ return; }
-
-  const tempo=parseFloat(tempoSlider.value);
-
-  if(playing){ animFrameF += dt * FPS * tempo; if(animFrameF>maxFrame) animFrameF = minFrame + (animFrameF - maxFrame); }
-  animFrameF = constrain(animFrameF, minFrame, maxFrame);
-
-  const hueShift = (parseInt(toneSlider.value)||0);
-  const hs = (h)=> (h + hueShift) % 360;
-
-  // 좌측 그리드
-  push(); translate(width/2, height/2); if(pTL&&pBR) drawDataGrid();
-
-  // 메인 도형/궤적
-  const mode = renderModeSel.value;
-  const iEnd = upperBound(orderedSegs, animFrameF);
-  const iStart = Math.max(0, iEnd - int(trailSlider.value));
-
-  if(mode==='lines'){
-    stroke(hs(190),20,90,36); strokeWeight(1);
-    for(const pts of contextLines){ for(let i=1;i<pts.length;i++) line(pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y); }
-    for(let i=iStart;i<=iEnd;i++){
-      const sg=orderedSegs[i], t=sg.tSm;
-      stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), lerp(SAT_SLOW,SAT_FAST,t), lerp(BRI_SLOW,BRI_FAST,t), 80);
-      strokeWeight(lerp(MIN_WEIGHT*1.4, MAX_WEIGHT*1.6, t));
-      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
-    }
-    for(let i=iStart;i<=iEnd;i++){
-      const age=(iEnd-i)/Math.max(1,(iEnd-iStart)), fade=1.0-age; const sg=orderedSegs[i], t=sg.tSm;
-      stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), lerp(SAT_SLOW,SAT_FAST,t), lerp(BRI_SLOW,BRI_FAST,t), lerp(BASE_ALPHA,MAX_ALPHA,t)*fade);
-      strokeWeight(lerp(MIN_WEIGHT, MAX_WEIGHT, t)*(0.85+0.15*fade));
-      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
-    }
-  } else {
-    const shapeType = shapeSel.value;
-    const sizeScale = parseFloat(shapeSizeSlider.value);
-    const useColorBySpeed = colorBySpeedChk.checked;
-
-    noStroke();
-    for(let i=iStart;i<=iEnd;i++){
-      const age=(iEnd-i)/Math.max(1,(iEnd-iStart)), fade=1.0-age;
-      const sg=orderedSegs[i], t=sg.tSm;
-      const sz = (lerp(4, 22, t) * sizeScale);
-      const alpha = 180 * fade;
-      const hue = useColorBySpeed ? hs(lerp(HUE_SLOW,HUE_FAST,t)) : hs(18);
-      fill(hue, useColorBySpeed ? lerp(SAT_SLOW,SAT_FAST,t) : 20,
-                 useColorBySpeed ? lerp(BRI_SLOW,BRI_FAST,t) : 18, alpha);
-
-      const x=sg.b.x, y=sg.b.y;
-      if(shapeType==='circle'){ ellipse(x,y,sz,sz); }
-      else if(shapeType==='square'){ push(); rectMode(CENTER); rect(x,y,sz,sz,2); pop(); }
-      else{ const ang = Math.atan2(sg.b.y - sg.a.y, sg.b.x - sg.a.x); const r = sz*0.6;
-            push(); translate(x,y); rotate(ang); triangle(-r*0.7, r*0.6, 0, -r, r*0.7, r*0.6); pop(); }
-    }
-  }
-
-  if(orderedSegs[iEnd]){
-    const cur=orderedSegs[iEnd].b; noStroke(); fill(0,220); ellipse(cur.x,cur.y,10,10);
-    const frameI=Math.round(animFrameF), timeSec=animFrameF/FPS; drawOverlay(frameI,timeSec);
-  }
-
-  // Figure 박스 위치/크기: 그리드 오른쪽, 바닥 라인 맞춤
-  if(pBR){
-    const gridBottomY = height/2 + pBR.y;
-    const maxPossibleSizeY = Math.max(40, gridBottomY - FIG_MARGIN);
-    figBox.size = Math.min(FIG_BASE_SIZE, maxPossibleSizeY);
-
-    const desiredCX = width/2 + pBR.x + FIG_PAD + figBox.size/2;
-    const minCX = figBox.size/2 + FIG_MARGIN;
-    const maxCX = width - figBox.size/2 - FIG_MARGIN;
-    figBox.cx = constrain(desiredCX, minCX, maxCX);
-
-    figBox.cy = gridBottomY - figBox.size/2;
-  }
-  pop();
-
-  if(showFig.checked && orderedSegs.length>0){
-    drawFigureMapped(animFrameF);
-  }
-
-  statePill.textContent = playing ? 'playing' : 'paused';
-  updateInfoBadge();
-}
-
-function upperBound(arr, frameF){
-  let lo=0, hi=arr.length-1, ans=0; while(lo<=hi){ const mid=(lo+hi)>>1; if(arr[mid].frameF<=frameF){ ans=mid; lo=mid+1; } else hi=mid-1; } return ans;
-}
-
-/* ====== figure (전체 몸으로 고정) ====== */
-function drawFigureMapped(frameF){
-  if(!rowsByBone || rowsByBone.size===0 || figBox.cx==null || figBox.cy==null) return;
-
-  const tempo = parseFloat(tempoSlider.value);
-  const smoothA = map(tempo, 0.2, 2.5, 0.55, 0.10, true);
-  const hueShift = (parseInt(toneSlider.value)||0);
-
-  // 전체 범위 기준 투영
-  const worldToFigGrid = (p)=> {
-    if(PROJECTION==='XY') return {x:(p.x-fcx)*fs, y:(p.y-fcy)*-fs};
-    if(PROJECTION==='XZ') return {x:(p.x-fcx)*fs, y:(p.z-fcz)*-fs};
-    return {x:(p.y-fcy)*fs, y:(p.z-fcz)*-fs};
-  };
-  const figGridToBox = (gx, gy)=>{
-    const gx0 = Math.min(fpTL.x, fpBR.x), gx1 = Math.max(fpTL.x, fpBR.x);
-    const gy0 = Math.min(fpTL.y, fpBR.y), gy1 = Math.max(fpTL.y, fpBR.y);
-    const fx = map(gx, gx0, gx1, figBox.cx - figBox.size/2, figBox.cx + figBox.size/2);
-    const fy = map(gy, gy0, gy1, figBox.cy - figBox.size/2, figBox.cy + figBox.size/2);
-    return {x:fx, y:fy};
-  };
-
-  // 전체 본만
-  const bonesToIter = allVisibleBones;
-  figState.forEach((_,bn)=>{ if(!allVisibleBones.has(bn)) figState.delete(bn); });
-
-  for(const bone of bonesToIter){
-    const p=sampleBoneAtFrameF(bone, frameF); if(!p) continue;
-    const prev=figState.get(bone)||p;
-    const sm={x:prev.x+(p.x-prev.x)*smoothA, y:prev.y+(p.y-prev.y)*smoothA, z:prev.z+(p.z-prev.z)*smoothA};
-    figState.set(bone,sm);
-  }
-
-  // clip
-  const ctx = drawingContext;
-  if (USE_CLIP){
-    ctx.save();
-    ctx.beginPath();
-    const bx = Math.round(figBox.cx - figBox.size/2);
-    const by = Math.round(figBox.cy - figBox.size/2);
-    const bw = Math.round(figBox.size);
-    const bh = Math.round(figBox.size);
-    ctx.rect(bx, by, bw, bh);
-    ctx.clip();
-  }
-
-  stroke((18+hueShift)%360, 90, 95, 235); strokeWeight(FIG_BONE_W); noFill();
-  for(const [a,b] of autoEdges){
-    const ba=jointToBone[a], bb=jointToBone[b]; 
-    if(!ba||!bb) continue;
-    const pa=figState.get(ba), pb=figState.get(bb); if(!pa||!pb) continue;
-    const ga=worldToFigGrid(pa), gb=worldToFigGrid(pb);
-    if(!isFinite(ga.x)||!isFinite(ga.y)||!isFinite(gb.x)||!isFinite(gb.y)) continue;
-    const fa=figGridToBox(ga.x,ga.y), fb=figGridToBox(gb.x,gb.y);
-    line(fa.x,fa.y,fb.x,fb.y);
-  }
-
-  if (SHOW_FIG_TRAIL){
-    const dotHue=(18+hueShift)%360; noStroke();
-    for(const k of Object.keys(JOINT_ALIASES)){
-      const bn=jointToBone[k];
-      const p=bn?figState.get(bn):null; if(!p) continue;
-      const g=worldToFigGrid(p); if(!isFinite(g.x)||!isFinite(g.y)) continue;
-      const fp=figGridToBox(g.x,g.y);
-      if(!jointTrail.has(k)) jointTrail.set(k,[]);
-      const arr=jointTrail.get(k); arr.push({x:fp.x,y:fp.y}); if(arr.length>FIG_TRAIL_LEN) arr.shift();
-      for(let i=0;i<arr.length;i++){
-        const f=i/(arr.length-1||1);
-        fill(dotHue, 90, 95, map(i,0,arr.length-1,80,220));
-        ellipse(arr[i].x,arr[i].y, 4*lerp(0.6,1,f), 4*lerp(0.6,1,f));
-      }
-    }
-  }
-  if (USE_CLIP) ctx.restore();
-}
-
-/* ===== grid/labels/util ===== */
 function drawDataGrid(){
   if(!extent || !pTL || !pBR) return;
   const ex = extentVis || extent;
@@ -679,10 +453,468 @@ function drawDataGrid(){
   push(); translate(pTL.x + 10, (pTL.y+pBR.y)/2); rotate(-HALF_PI); textAlign(CENTER,TOP); text(ayName+' (FBX units)',0,0); pop();
   pop();
 }
+
+/* ===================== SEGMENTS ===================== */
+function rebuildSegments(){
+  if(!rowsByBone) return;
+  segments=[]; orderedSegs=[]; contextLines=[];
+  extentVis = {minX:1e9,maxX:-1e9,minY:1e9,maxY:-1e9,minZ:1e9,maxZ:-1e9};
+  const part=(partSel?partSel.value:'ALL'), boneFilter=(boneSel?boneSel.value:'');
+
+  allVisibleBones = new Set([...rowsByBone.keys()].filter(b=>!isHiddenBone(b)));
+
+  const candidates=(boneFilter)?[boneFilter]:(part==='ALL'?Array.from(rowsByBone.keys()):Array.from(bonesByPart.get(part)||[]));
+  const useBones=(candidates||[]).filter(b=>!isHiddenBone(b));
+  activeBones = new Set(useBones);
+
+  let updatedVis=false;
+  for(const b of useBones){
+    const arrFull=(rowsByBone.get(b)||[]);
+    for(const q of arrFull){
+      if(q.x<extentVis.minX) extentVis.minX=q.x; if(q.x>extentVis.maxX) extentVis.maxX=q.x;
+      if(q.y<extentVis.minY) extentVis.minY=q.y; if(q.y>extentVis.maxY) extentVis.maxY=q.y;
+      if(q.z<extentVis.minZ) extentVis.minZ=q.z; if(q.z>extentVis.maxZ) extentVis.maxZ=q.z;
+      updatedVis=true;
+    }
+  }
+  if(!updatedVis){ extentVis = extent; }
+
+  computeView(); computeFigureView();
+
+  const W2S=(o)=> (PROJECTION==='XY')?{x:(o.x-cx)*s,y:(o.y-cy)*-s}:(PROJECTION==='XZ')?{x:(o.x-cx)*s,y:(o.z-cz)*-s}:{x:(o.y-cy)*s,y:(o.z-cz)*-s};
+  let allSpeeds=[];
+  for(const b of useBones){
+    const arrFull=(rowsByBone.get(b)||[]);
+    const arr=arrFull.filter((_,i)=>(i%FRAME_SKIP)===0);
+    if(arr.length<2) continue;
+    const pts=[];
+    for(let i=1;i<arr.length;i++){
+      const prev=arr[i-1], curr=arr[i]; const p0=W2S(prev), p1=W2S(curr); pts.push(p0);
+      const d=dist(p0.x,p0.y,p1.x,p1.y), n=Math.max(1,int(d*CURVE_SUBDIV_FACTOR)); let pv=p0;
+      for(let k=1;k<=n;k++){
+        const t=k/n, x=lerp(p0.x,p1.x,t), y=lerp(p0.y,p1.y,t), spd=dist(pv.x,pv.y,x,y), frameF=lerp(prev.f,curr.f,t);
+        segments.push({a:{...pv}, b:{x,y}, spd, frameF}); allSpeeds.push(spd); pv={x,y};
+      }
+      if(i===arr.length-1) pts.push(p1);
+    }
+    contextLines.push(pts);
+  }
+  if(segments.length===0){ statePill.textContent='no data'; return; }
+
+  allSpeeds.sort((a,b)=>a-b); const q=p=>allSpeeds[int(constrain(p*(allSpeeds.length-1),0,allSpeeds.length-1))];
+  const SLOW=q(0.10), FAST=q(0.95);
+  const tVals=segments.map(sg=>norm(clamp(sg.spd,SLOW,FAST),SLOW,FAST)); const sm=new Array(tVals.length); sm[0]=tVals[0];
+  for(let i=1;i<tVals.length;i++) sm[i]=lerp(sm[i-1],tVals[i],SMOOTH_ALPHA_BASE);
+  segments.forEach((sg,i)=>sg.tSm=sm[i]);
+  orderedSegs=segments.slice().sort((a,b)=>a.frameF-b.frameF);
+  statePill.textContent='ready'; updateInfoBadge();
+}
+
+/* ===================== SAMPLING ===================== */
+function sampleBoneAtFrameF(bone, frameF){
+  const arr=rowsByBone.get(bone); if(!arr||arr.length===0) return null;
+  let i=idxCache.get(bone)||0; while(i<arr.length-2&&arr[i+1].f<frameF)i++; while(i>0&&arr[i].f>frameF)i--; idxCache.set(bone,i);
+  const a=arr[i], b=arr[Math.min(i+1,arr.length-1)];
+  const denom = Math.max(1e-6, (b.f - a.f));
+  const t = constrain((frameF - a.f)/denom, 0, 1);
+  if(!isFinite(t)) return {x:a.x, y:a.y, z:a.z};
+  return {x:lerp(a.x,b.x,t), y:lerp(a.y,b.y,t), z:lerp(a.z,b.z,t)};
+}
+
+/* ===================== DRAW ===================== */
+function draw(){
+  const now=millis(), dt=(now-lastMillis)/1000; lastMillis=now;
+  background(useDarkBg? BG_DARK : BG_LIGHT);
+
+  if(!orderedSegs || !extent || !pTL || !pBR){ return; }
+
+  const tempo=parseFloat(tempoSlider.value);
+  if(playing){ animFrameF += dt * FPS * tempo; if(animFrameF>maxFrame) animFrameF = minFrame + (animFrameF - maxFrame); }
+  animFrameF = constrain(animFrameF, minFrame, maxFrame);
+
+  const hueShift = (parseInt(toneSlider.value)||0);
+  const hs = (h)=> (h + hueShift) % 360;
+
+  // grid
+  push(); translate(width/2, height/2); if(pTL&&pBR) drawDataGrid();
+
+  // mode window
+  const mode = renderModeSel.value;
+  const iEnd = upperBound(orderedSegs, animFrameF);
+  const iStart = Math.max(0, iEnd - int(trailSlider.value));
+
+  const sizeMul = pSize; // global particle/weight multiplier
+
+  /* ====== CLASSIC & GRAPHIC MODES ====== */
+  if(mode==='lines'){
+    stroke(hs(190),20,90,36); strokeWeight(1*sizeMul);
+    for(const pts of contextLines){ for(let i=1;i<pts.length;i++) line(pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y); }
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i], t=sg.tSm;
+      stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), lerp(SAT_SLOW,SAT_FAST,t), lerp(BRI_SLOW,BRI_FAST,t), 80);
+      strokeWeight(lerp(MIN_WEIGHT*1.4, MAX_WEIGHT*1.6, t)*0.7*sizeMul);
+      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
+    }
+  }
+  else if(mode==='shapes'){
+    noStroke();
+    for(let i=iStart;i<=iEnd;i++){
+      const age=(iEnd-i)/Math.max(1,(iEnd-iStart)), fade=1.0-age;
+      const sg=orderedSegs[i], t=sg.tSm;
+      const sz = (lerp(4, 22, t) * 1.2) * sizeMul;
+      const alpha = 180 * fade;
+      const hue = hs(lerp(HUE_SLOW,HUE_FAST,t));
+      fill(hue, lerp(SAT_SLOW,SAT_FAST,t), lerp(BRI_SLOW,BRI_FAST,t), alpha);
+      const x=sg.b.x, y=sg.b.y;
+      ellipse(x,y,sz,sz);
+    }
+  }
+  else if(mode==='flow'){
+    const ns = 0.006; const sp = 1.6 * tempo;
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i];
+      const t=sg.tSm; 
+      const baseH = hs(lerp(HUE_SLOW,HUE_FAST,t));
+      let x=sg.b.x, y=sg.b.y;
+      for(let step=0; step<3; step++){
+        const ang = noise(x*ns, y*ns, (frameCount+step)*0.004)*TAU*2.8;
+        const nx = x + Math.cos(ang)*sp*2.2;
+        const ny = y + Math.sin(ang)*sp*2.2;
+        stroke(baseH, 85, 70, 170);
+        strokeWeight((2.8 + 2.2*t)*sizeMul); line(x,y,nx,ny);
+        stroke(baseH, 95, 40 + 55*t, 220);
+        strokeWeight((1.6 + 1.6*t)*sizeMul); line(x,y,nx,ny);
+        x = nx; y = ny;
+      }
+    }
+  }
+  else if(mode==='path'){
+    noFill();
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i];
+      const age=(iEnd-i)/Math.max(1,(iEnd-iStart));
+      const tt = (frameCount*0.002 + i*0.0007) % 1;
+      const ax = (pBR.x - pTL.x)*0.3, ay=(pBR.y - pTL.y)*0.2;
+      const cx0=(pTL.x+pBR.x)/2, cy0=(pTL.y+pBR.y)/2;
+      const x = cx0 + ax * Math.sin(TAU*tt*3 + 0.3);
+      const y = cy0 + ay * Math.sin(TAU*tt*2 + 1.2);
+      const bx = lerp(x, sg.b.x, 0.45);
+      const by = lerp(y, sg.b.y, 0.45);
+      const t=sg.tSm; stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), 80, 65, 120*(1-age)); strokeWeight((1.2+3.2*t)*sizeMul);
+      line(sg.b.x, sg.b.y, bx, by);
+    }
+  }
+  else if(mode==='magic'){
+    drawingContext.save(); blendMode(ADD);
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i];
+      const age=(iEnd-i)/Math.max(1,(iEnd-iStart));
+      const t=sg.tSm; const w = (1.2 + 3.6*t)*sizeMul; const hue = hs(40 + t*220);
+      stroke(hue, 95, 85, 230*(1-age*0.8)); strokeWeight(w);
+      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
+      stroke(hue, 80, 95, 120*(1-age)); strokeWeight(w*3.2);
+      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
+    }
+    blendMode(BLEND); drawingContext.restore();
+  }
+  else if(mode==='metallic'){
+    drawingContext.save(); blendMode(SCREEN);
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i]; const t=sg.tSm; const w=(1.2+3.0*t)*sizeMul;
+      const dir = Math.atan2(sg.b.y - sg.a.y, sg.b.x - sg.a.x);
+      stroke(hs(220), 30+50*t, (useDarkBg? 70:40), 160); strokeWeight(w*1.1);
+      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
+      stroke(hs(30), 50+40*t, (useDarkBg? 80:55), 120); strokeWeight(w*0.9);
+      line(sg.a.x,sg.a.y,sg.b.x,sg.b.y);
+      const hx = sg.b.x + Math.cos(dir+HALF_PI)*2.0;
+      const hy = sg.b.y + Math.sin(dir+HALF_PI)*2.0;
+      stroke(0,0,100, 140); strokeWeight(w*0.6); line(hx,hy, sg.b.x,sg.b.y);
+    }
+    blendMode(BLEND); drawingContext.restore();
+  }
+  else if(mode==='fibo'){
+    const N = (iEnd - iStart + 1);
+    const phi = (1 + Math.sqrt(5)) / 2; const golden = TAU / phi;
+    for(let k=0;k<N;k++){
+      const i=iStart+k; const sg=orderedSegs[i]; if(!sg) continue;
+      const r = map(k,0,N, 2, Math.min(width,height)*0.08);
+      const a = k * golden + frameCount*0.012;
+      const x = sg.b.x + Math.cos(a)*r*0.38;
+      const y = sg.b.y + Math.sin(a)*r*0.38;
+      const t=sg.tSm; const sz = (2.2 + 4.0*t) * sizeMul;
+      noStroke(); fill(hs(lerp(HUE_SLOW,HUE_FAST,t)), 85, 60+35*t, 170*(k/N));
+      ellipse(x,y,sz,sz);
+    }
+  }
+  else if(mode==='shards'){
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i];
+      const t=sg.tSm; const w=(4.0 + 8.0*t)*0.6*sizeMul;
+      const hue=hs( lerp(12, 320, t) );
+      stroke(hue, 90, 50+50*t, 220); strokeWeight(w);
+      const dx=sg.b.x - sg.a.x, dy=sg.b.y - sg.a.y; const len=Math.hypot(dx,dy);
+      const cut=Math.max(6, Math.min(len*0.6, 24 + 26*t));
+      const ux=dx/Math.max(1e-6,len), uy=dy/Math.max(1e-6,len);
+      const cx=sg.b.x - ux*cut*0.5, cy=sg.b.y - uy*cut*0.5;
+      line(cx-ux*cut*0.5, cy-uy*cut*0.5, cx+ux*cut*0.5, cy+uy*cut*0.5);
+    }
+  }
+  else if(mode==='ribbon'){
+    noStroke();
+    for(let i=iStart+1;i<=iEnd;i+=2){
+      const a=orderedSegs[i-1], b=orderedSegs[i]; if(!a||!b) continue;
+      const t=b.tSm; const w = (6 + 18*t) * 0.8 * sizeMul;
+      const hueA = hs(lerp(HUE_SLOW,HUE_FAST,t));
+      const hueB = hs(lerp(HUE_SLOW,HUE_FAST,Math.max(0,t-0.15)));
+      const dx=b.b.x - b.a.x, dy=b.b.y - b.a.y; const L=Math.hypot(dx,dy)||1;
+      const nx=-dy/L, ny=dx/L;
+      const twist = Math.sin((i*0.15) + frameCount*0.05);
+      const w1 = w*(0.6+0.4*twist), w2=w*(0.6-0.4*twist);
+      fill(hueA, 90, 60+35*t, 190); quad(a.b.x+nx*w1, a.b.y+ny*w1, a.b.x-nx*w1, a.b.y-ny*w1, b.b.x-nx*w2, b.b.y-ny*w2, b.b.x+nx*w2, b.b.y+ny*w2);
+      fill(hueB, 70, 85, 80);       quad(a.b.x+nx*(w1*0.35), a.b.y+ny*(w1*0.35), a.b.x-nx*(w1*0.35), a.b.y-ny*(w1*0.35), b.b.x-nx*(w2*0.35), b.b.y-ny*(w2*0.35), b.b.x+nx*(w2*0.35), b.b.y+ny*(w2*0.35));
+    }
+  }
+  else if(mode==='brush'){
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i];
+      const t=sg.tSm; const base=(2.0 + 2.4*t) * sizeMul; const cnt=3 + int(4*t);
+      for(let k=0;k<cnt;k++){
+        const jitter = (k - (cnt-1)/2) * (1.6 + 0.7*t) * sizeMul;
+        const ang = Math.atan2(sg.b.y - sg.a.y, sg.b.x - sg.a.x) + (k-1)*0.03;
+        const lx = sg.b.x + Math.cos(ang+HALF_PI)*jitter;
+        const ly = sg.b.y + Math.sin(ang+HALF_PI)*jitter;
+        stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), 80, 55+40*t, 180);
+        strokeWeight(base + k*0.35*sizeMul);
+        line(lx,ly, lx - Math.cos(ang)* (6+10*t), ly - Math.sin(ang)* (6+10*t));
+      }
+    }
+  }
+  else if(mode==='hatch'){
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i]; const t=sg.tSm;
+      const ang = Math.atan2(sg.b.y - sg.a.y, sg.b.x - sg.a.x) + PI/4;
+      const len = (8 + 18*t) * sizeMul; const gaps = 2 + int(2*t);
+      for(let k=-gaps;k<=gaps;k++){
+        const ox = Math.cos(ang+HALF_PI)*k*2.2*sizeMul;
+        const oy = Math.sin(ang+HALF_PI)*k*2.2*sizeMul;
+        stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), 30+50*t, 30+50*t, 200);
+        strokeWeight((1.2 + 0.8*t)*sizeMul);
+        line(sg.b.x+ox - Math.cos(ang)*len*0.5, sg.b.y+oy - Math.sin(ang)*len*0.5,
+             sg.b.x+ox + Math.cos(ang)*len*0.5, sg.b.y+oy + Math.sin(ang)*len*0.5);
+      }
+    }
+  }
+  else if(mode==='noisebrush'){
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i]; const t=sg.tSm;
+      const cnt = 4 + int(3*t); const len = (6 + 14*t) * sizeMul;
+      for(let k=0;k<cnt;k++){
+        const phi = Math.atan2(sg.b.y - sg.a.y, sg.b.x - sg.a.x)
+                  + (noise(i*0.1,k*0.2,frameCount*0.01)-0.5)*0.8;
+        const jitter = (noise(i*0.07,k*0.17,frameCount*0.012)-0.5)*8.0*sizeMul;
+        const px = sg.b.x + Math.cos(phi+HALF_PI)*jitter;
+        const py = sg.b.y + Math.sin(phi+HALF_PI)*jitter;
+        stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), 60+35*t, 40+50*t, 180);
+        strokeWeight((1.2 + 1.8*t)*sizeMul);
+        line(px,py, px - Math.cos(phi)*len, py - Math.sin(phi)*len);
+      }
+    }
+  }
+  else if(mode==='stippling'){
+    noStroke();
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i]; const t=sg.tSm; const n=3 + int(5*t);
+      for(let k=0;k<n;k++){
+        const ang = random(TAU); const r= random(0, (6+12*t)*sizeMul);
+        const x = sg.b.x + Math.cos(ang)*r*0.4; const y = sg.b.y + Math.sin(ang)*r*0.4;
+        const sz = (1 + 2.4*t*random()) * sizeMul;
+        const L = (useDarkBg? 80 : (40 + 40*t));
+        fill(hs(lerp(HUE_SLOW,HUE_FAST,t)+random(-8,8)), 60+30*t, L, 200);
+        ellipse(x,y,sz,sz);
+      }
+    }
+  }
+
+  /* ====== EXPERIMENTAL MODES ====== */
+  else if(mode==='orbit'){
+    noFill();
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i], t=sg.tSm;
+      const a=frameCount*0.02 + i*0.005;
+      const r= (8 + 20*t*(0.6+0.4*Math.sin(frameCount*0.05+i*0.02))) * sizeMul;
+      stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)), 80, 90, 140);
+      strokeWeight((1.2+2.2*t)*sizeMul);
+      line(sg.b.x,sg.b.y, sg.b.x + Math.cos(a)*r, sg.b.y + Math.sin(a)*r);
+    }
+  }
+  else if(mode==='voronoi'){
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i], t=sg.tSm;
+      const n=2+int(3*t);
+      for(let k=0;k<n;k++){
+        const ang = random(TAU), d=random(6,18+20*t)*sizeMul;
+        stroke(hs(lerp(HUE_SLOW,HUE_FAST,t)+random(-10,10)), 90, 80, 160);
+        strokeWeight((1.2+1.0*t)*sizeMul);
+        line(sg.b.x,sg.b.y, sg.b.x+Math.cos(ang)*d, sg.b.y+Math.sin(ang)*d);
+      }
+    }
+  }
+  else if(mode==='glitch'){
+    for(let i=iStart;i<=iEnd;i+=2){
+      const sg=orderedSegs[i], t=sg.tSm;
+      const jx = (noise(i*0.1, frameCount*0.03)-0.5)*30*(0.3+0.7*t)*sizeMul;
+      stroke(hs(180+80*t), 20+60*t, useDarkBg? 90:30, 160);
+      strokeWeight((1.0+1.5*t)*sizeMul);
+      line(sg.b.x-jx, sg.b.y, sg.b.x+jx, sg.b.y);
+    }
+  }
+  else if(mode==='ink'){
+    drawingContext.save(); blendMode(MULTIPLY);
+    noStroke();
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i], t=sg.tSm;
+      const r = (6 + 18*t) * sizeMul;
+      fill(hs(lerp(HUE_SLOW,HUE_FAST,t)), 30+30*t, 60, 40);
+      ellipse(sg.b.x, sg.b.y, r*1.6, r*1.1);
+    }
+    blendMode(BLEND); drawingContext.restore();
+  }
+  else if(mode==='emboss'){
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i], t=sg.tSm;
+      const n = {x:-(sg.b.y-sg.a.y), y:(sg.b.x-sg.a.x)}; const L=Math.hypot(n.x,n.y)||1; n.x/=L; n.y/=L;
+      stroke(0,0,useDarkBg?100:30, 180); strokeWeight((2.0+2.0*t)*sizeMul);
+      line(sg.a.x+n.x*1.5, sg.a.y+n.y*1.5, sg.b.x+n.x*1.5, sg.b.y+n.y*1.5);
+      stroke(0,0,useDarkBg?30:70, 180); strokeWeight((2.0+2.0*t)*sizeMul);
+      line(sg.a.x-n.x*1.5, sg.a.y-n.y*1.5, sg.b.x-n.x*1.5, sg.b.y-n.y*1.5);
+    }
+  }
+  else if(mode==='halftone'){
+    noStroke();
+    for(let i=iStart;i<=iEnd;i+=3){
+      const sg=orderedSegs[i], t=sg.tSm;
+      const gx = Math.round(sg.b.x/10)*10, gy=Math.round(sg.b.y/10)*10;
+      const sz = (1.5 + 3.5*t) * sizeMul;
+      fill(hs(lerp(HUE_SLOW,HUE_FAST,t)), 40+50*t, useDarkBg?80:35, 200);
+      ellipse(gx,gy,sz,sz);
+    }
+  }
+  else if(mode==='weave'){
+    noStroke();
+    for(let i=iStart+1;i<=iEnd;i++){
+      const a=orderedSegs[i-1], b=orderedSegs[i]; if(!a||!b) continue;
+      const t=b.tSm; const w = (6 + 14*t) * sizeMul;
+      const dx=b.b.x - b.a.x, dy=b.b.y - b.a.y; const L=Math.hypot(dx,dy)||1;
+      const nx=-dy/L, ny=dx/L;
+      const front = ((i>>2)&1)===0;
+      fill(hs(front? lerp(HUE_SLOW,HUE_FAST,t):lerp(HUE_SLOW,HUE_FAST,1-t)), 80, front?85:55, front?190:110);
+      quad(a.b.x+nx*w, a.b.y+ny*w, a.b.x-nx*w, a.b.y-ny*w, b.b.x-nx*w, b.b.y-ny*w, b.b.x+nx*w, b.b.y+ny*w);
+    }
+  }
+  else if(mode==='electric'){
+    // force dark bg
+    if(!useDarkBg){ useDarkBg=true; bgToggle.checked=true; }
+    drawingContext.save(); blendMode(ADD);
+    for(let i=iStart;i<=iEnd;i++){
+      const sg=orderedSegs[i], t=sg.tSm;
+      const branches = 2 + int(2*t);
+      for(let b=0;b<branches;b++){
+        let x=sg.b.x, y=sg.b.y;
+        stroke(hs(200+80*t), 90, 90, 120); strokeWeight((1.0+1.1*t)*sizeMul);
+        for(let k=0;k<5;k++){
+          const ang = random(TAU);
+          const len = (4 + 6*t) * sizeMul;
+          const nx = x + Math.cos(ang)*len, ny = y + Math.sin(ang)*len;
+          line(x,y,nx,ny); x=nx; y=ny;
+        }
+      }
+    }
+    blendMode(BLEND); drawingContext.restore();
+  }
+
+  if(orderedSegs[iEnd]){
+    const cur=orderedSegs[iEnd].b; noStroke(); fill(0,220); ellipse(cur.x,cur.y,10,10);
+    const frameI=Math.round(animFrameF), timeSec=animFrameF/FPS; drawOverlay(frameI,timeSec);
+  }
+
+  // figure box position (bottom-right of grid)
+  if(pBR){
+    const gridBottomY = height/2 + pBR.y;
+    const maxPossibleSizeY = Math.max(40, gridBottomY - FIG_MARGIN);
+    figBox.size = Math.min(FIG_BASE_SIZE, maxPossibleSizeY);
+    const desiredCX = width/2 + pBR.x + FIG_PAD + figBox.size/2;
+    const minCX = figBox.size/2 + FIG_MARGIN;
+    const maxCX = width - figBox.size/2 - FIG_MARGIN;
+    figBox.cx = constrain(desiredCX, minCX, maxCX);
+    figBox.cy = gridBottomY - figBox.size/2;
+  }
+  pop();
+
+  drawFigureMapped(animFrameF);
+
+  statePill.textContent = playing ? 'playing' : 'paused';
+  updateInfoBadge();
+}
+
+function upperBound(arr, frameF){
+  let lo=0, hi=arr.length-1, ans=0; while(lo<=hi){ const mid=(lo+hi)>>1; if(arr[mid].frameF<=frameF){ ans=mid; lo=mid+1; } else hi=mid-1; } return ans;
+}
+
+/* ===================== FIGURE ===================== */
+function drawFigureMapped(frameF){
+  if(!rowsByBone || rowsByBone.size===0 || figBox.cx==null || figBox.cy==null) return;
+
+  const smoothA = 0.25;
+  const hueShift = (parseInt(toneSlider.value)||0);
+
+  const worldToFigGrid = (p)=> {
+    if(PROJECTION==='XY') return {x:(p.x-fcx)*fs, y:(p.y-fcy)*-fs};
+    if(PROJECTION==='XZ') return {x:(p.x-fcx)*fs, y:(p.z-fcz)*-fs};
+    return {x:(p.y-fcy)*fs, y:(p.z-fcz)*-fs};
+  };
+  const figGridToBox = (gx, gy)=>{
+    const gx0 = Math.min(fpTL.x, fpBR.x), gx1 = Math.max(fpTL.x, fpBR.x);
+    const gy0 = Math.min(fpTL.y, fpBR.y), gy1 = Math.max(fpTL.y, fpBR.y);
+    const fx = map(gx, gx0, gx1, figBox.cx - figBox.size/2, figBox.cx + figBox.size/2);
+    const fy = map(gy, gy0, gy1, figBox.cy - figBox.size/2, figBox.cy + figBox.size/2);
+    return {x:fx, y:fy};
+  };
+
+  for(const bone of allVisibleBones){
+    const p=sampleBoneAtFrameF(bone, frameF); if(!p) continue;
+    const prev=figState.get(bone)||p;
+    const sm={x:prev.x+(p.x-prev.x)*smoothA, y:prev.y+(p.y-prev.y)*smoothA, z:prev.z+(p.z-prev.z)*smoothA};
+    figState.set(bone,sm);
+  }
+
+  const ctx = drawingContext;
+  ctx.save();
+  ctx.beginPath();
+  const bx = Math.round(figBox.cx - figBox.size/2);
+  const by = Math.round(figBox.cy - figBox.size/2);
+  const bw = Math.round(figBox.size);
+  const bh = Math.round(figBox.size);
+  ctx.rect(bx, by, bw, bh);
+  ctx.clip();
+
+  stroke((18+hueShift)%360, 90, useDarkBg? 95:35, 235); strokeWeight(FIG_BONE_W); noFill();
+  for(const [a,b] of autoEdges){
+    const ba=jointToBone[a], bb=jointToBone[b]; 
+    if(!ba||!bb) continue;
+    const pa=figState.get(ba), pb=figState.get(bb); if(!pa||!pb) continue;
+    const ga=worldToFigGrid(pa), gb=worldToFigGrid(pb);
+    if(!isFinite(ga.x)||!isFinite(ga.y)||!isFinite(gb.x)||!isFinite(gb.y)) continue;
+    const fa=figGridToBox(ga.x,ga.y), fb=figGridToBox(gb.x,gb.y);
+    line(fa.x,fa.y,fb.x,fb.y);
+  }
+  ctx.restore();
+}
+
+/* ===================== UI / UTILS ===================== */
 function drawOverlay(frameI,timeSec){
   if(!pTL||!pBR) return;
   push(); rectMode(CORNER); noStroke(); textFont('Helvetica'); textSize(16); textAlign(LEFT,TOP);
-  const pad=12,bw=200,bh=48; fill(255,225); rect(pTL.x + pad - 6, pTL.y + pad - 6, bw, bh, 8);
+  const pad=12,bw=220,bh=48; fill(255,225); rect(pTL.x + pad - 6, pTL.y + pad - 6, bw, bh, 8);
   fill(0,200); text(`Frame: ${frameI}`, pTL.x + pad, pTL.y + pad);
   text(`Time: ${timeSec.toFixed(2)} s`, pTL.x + pad, pTL.y + pad + 22); pop();
 }
@@ -699,40 +931,31 @@ function setTrailMid(){
     trailSlider.value = String(snapped);
   }
 }
-function refreshBoneOptions(){
-  const part=partSel.value;
-  const bones=(part==='ALL')?Array.from(rowsByBone.keys()).sort():Array.from(bonesByPart.get(part)||[]).sort();
-  boneSel.innerHTML='<option value="">— all bones in part —</option>'+bones.map(b=>`<option value="${b}">${b}</option>`).join('');
-  rebuildSegments();
-}
 function niceTicks(min,max,count){ const span=max-min, step0=span/Math.max(1,count), pow10=Math.pow(10,Math.floor(Math.log10(step0)));
   let step=pow10; const err=step0/pow10; if(err>=7.5) step=10*pow10; else if(err>=3.5) step=5*pow10; else if(err>=1.5) step=2*pow10;
   const tmin=Math.ceil(min/step)*step, tmax=Math.floor(max/step)*step, ticks=[]; for(let v=tmin; v<=tmax+1e-9; v+=step) ticks.push(v); return {ticks, step}; }
 function ticksByFixedStep(min,max,step){ const s=(step<=0)?1:step, tmin=Math.ceil(min/s)*s, tmax=Math.floor(max/s)*s, ticks=[];
   for(let v=tmin; v<=tmax+1e-9; v+=s) ticks.push(v); return {ticks, step:s}; }
 function subticks(majorTicks,subdiv){ if(majorTicks.length<2||subdiv<2) return []; const out=[];
-  for(let i=0;i<majorTicks.length-1;i++){ const a=majorTicks[i], b=majorTicks[i+1], st=(b-a)/subdiv; for(let k=1;k<subdiv;k++) out.push(a+st*k); } return out; }
+  for(let i=0;i<majorTicks.length-1;i++){ const a=majorTicks[i], b=majorTicks[i+1], st=(b-a)/subdiv; for(let k=1; k<subdiv; k++) out.push(a+st*k); } return out; }
 function formatNum(v,dec){ const m=Math.pow(10,dec); return String(Math.round(v*m)/m); }
 function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
 function norm(v,a,b){ return (v-a)/Math.max(1e-6,(b-a)); }
-function lerpHue(a,b,t){ let d=((b - a + 540) % 360) - 180; return (a + d*t + 360) % 360; }
 function updateLegendTone(hShift){
   const hSlow=(HUE_SLOW + hShift) % 360;
   const hFast=(HUE_FAST + hShift) % 360;
-  const hMid = (lerpHue(HUE_SLOW,HUE_FAST,0.5) + hShift) % 360;
-  dotSlow.style.background = `hsl(${hSlow}, 70%, 45%)`;
-  dotMid .style.background = `hsl(${hMid }, 90%, 52%)`;
-  dotFast.style.background = `hsl(${hFast}, 100%, 50%)`;
+  const hMid = ((HUE_SLOW+HUE_FAST)/2 + hShift) % 360;
+  document.getElementById('dotSlow').style.background = `hsl(${hSlow}, 70%, 45%)`;
+  document.getElementById('dotMid').style.background  = `hsl(${hMid},  90%, 52%)`;
+  document.getElementById('dotFast').style.background = `hsl(${hFast}, 100%, 50%)`;
 }
-
-/* ===== input/keys ===== */
 function keyPressed(){
   if(key===' ') { playing=!playing; return false; }
   if(keyCode===LEFT_ARROW)  { animFrameF -= 1*FPS; if(animFrameF<minFrame) animFrameF=maxFrame - (minFrame-animFrameF) }
   if(keyCode===RIGHT_ARROW) { animFrameF += 1*FPS; if(animFrameF>maxFrame) animFrameF=minFrame + (animFrameF-maxFrame) }
   if(keyCode===UP_ARROW)    { tempoSlider.value = String(Math.min(2.5, parseFloat(tempoSlider.value)+0.1)); }
   if(keyCode===DOWN_ARROW)  { tempoSlider.value = String(Math.max(0.2, parseFloat(tempoSlider.value)-0.1)); }
-  if(key==='S') saveCanvas('movement_map_shapes_multistyle','png');
+  if(key==='S') saveCanvas('movement_map_graphic_trails','png');
 }
 function showErr(msg){ errBox.textContent=msg; errBox.style.display='block'; }
 </script>
